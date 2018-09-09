@@ -1,3 +1,7 @@
+# This script belongs to VictorDibia, he wrote majority of the code
+#     I have made slight modifications to make it work for my program, however I am not taking
+#      credit for the bulk of the code in this file.
+
 from utils import detector_utils as detector_utils 
 import cv2
 import tensorflow as tf
@@ -7,10 +11,13 @@ import time
 from utils.detector_utils import WebcamVideoStream
 import datetime
 import argparse
+from main_game import Display
 
 
 frame_processed = 0
 score_thresh = 0.2
+
+d = Display()
 
 # Create a worker thread that loads graph and
 # does detection on images in an input queue and puts it on an output queue
@@ -27,8 +34,8 @@ def worker(input_q, output_q, cap_params, frame_processed):
             boxes, scores = detector_utils.detect_objects(
                 frame, detection_graph, sess)
             # draw bounding boxes
-            detector_utils.draw_box_on_image(
-                cap_params['num_hands_detect'], cap_params["score_thresh"], scores, boxes, cap_params['im_width'], cap_params['im_height'], frame)
+            d.update_display(detector_utils.draw_box_on_image(
+                cap_params['num_hands_detect'], cap_params["score_thresh"], scores, boxes, cap_params['im_width'], cap_params['im_height'], frame))
             # add frame annotated with bounding box to queue
             output_q.put(frame)
             frame_processed += 1
@@ -114,9 +121,9 @@ if __name__ == '__main__':
                 if (num_frames == 400):
                     num_frames = 0
                     start_time = datetime.datetime.now()
-                else:
-                    print("frames processed: ",  index,
-                          "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
+                #else:
+                    # print("frames processed: ",  index,
+                      #    "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
         else:
             # print("video end")
             break

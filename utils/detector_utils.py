@@ -61,7 +61,9 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
             center = (int((int(left) + int(right)) / 2), (int(int(top) + int(bottom)) / 2))
             print("X-coordinate: {} Y-Coordinate: {}".format(center[0], center[1]))
             cv2.rectangle(image_np, p1, p2, (77, 255, 9), 3, 1)
+            return center
             #cv2.circle(image_np, center, 5, (77, 255, 9), 3, 1)
+
 
 
 # Show fps value on image.
