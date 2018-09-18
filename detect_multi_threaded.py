@@ -11,18 +11,18 @@ import time
 from utils.detector_utils import WebcamVideoStream
 import datetime
 import argparse
-from main_game import Display
+from display import Display
 
 
 frame_processed = 0
 score_thresh = 0.2
 
-d = Display()
+#
 
 # Create a worker thread that loads graph and
 # does detection on images in an input queue and puts it on an output queue
 
-def worker(input_q, output_q, cap_params, frame_processed):
+def worker(input_q, output_q, cap_params, frame_processed, display_q):
     print(">> loading frozen model for worker")
     detection_graph, sess = detector_utils.load_inference_graph()
     sess = tf.Session(graph=detection_graph)
@@ -34,8 +34,9 @@ def worker(input_q, output_q, cap_params, frame_processed):
             boxes, scores = detector_utils.detect_objects(
                 frame, detection_graph, sess)
             # draw bounding boxes
-            d.update_display(detector_utils.draw_box_on_image(
-                cap_params['num_hands_detect'], cap_params["score_thresh"], scores, boxes, cap_params['im_width'], cap_params['im_height'], frame))
+            coordinate = detector_utils.draw_box_on_image(
+                cap_params['num_hands_detect'], cap_params["score_thresh"], scores, boxes, cap_params['im_width'], cap_params['im_height'], frame)
+            display_q.put(coordinate)
             # add frame annotated with bounding box to queue
             output_q.put(frame)
             frame_processed += 1
@@ -58,15 +59,18 @@ if __name__ == '__main__':
     parser.add_argument('-ht', '--height', dest='height', type=int,
                         default=200, help='Height of the frames in the video stream.')
     parser.add_argument('-ds', '--display', dest='display', type=int,
-                        default=1, help='Display the detected images using OpenCV. This reduces FPS')
+                        default=0, help='Display the detected images using OpenCV. This reduces FPS')
     parser.add_argument('-num-w', '--num-workers', dest='num_workers', type=int,
-                        default=4, help='Number of workers.')
+                        default=2, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
                         default=5, help='Size of the queue.')
     args = parser.parse_args()
 
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
+    display_q = Queue()
+
+    d = Display()
 
     video_capture = WebcamVideoStream(src=args.video_source,
                                       width=args.width,
@@ -84,14 +88,14 @@ if __name__ == '__main__':
 
     # spin up workers to paralleize detection.
     pool = Pool(args.num_workers, worker,
-                (input_q, output_q, cap_params, frame_processed))
+                (input_q, output_q, cap_params, frame_processed, display_q))
 
     start_time = datetime.datetime.now()
     num_frames = 0
     fps = 0
     index = 0
 
-    cv2.namedWindow('Multi-Threaded Detection', cv2.WINDOW_NORMAL)
+    #cv2.namedWindow('Multi-Threaded Detection', cv2.WINDOW_NORMAL)
 
     while True:
         frame = video_capture.read()
@@ -102,6 +106,10 @@ if __name__ == '__main__':
         output_frame = output_q.get()
 
         output_frame = cv2.cvtColor(output_frame, cv2.COLOR_RGB2BGR)
+
+        coordinate = display_q.get()
+        if (coordinate is not None):
+            d.update_display(coordinate)
 
         elapsed_time = (datetime.datetime.now() -
                         start_time).total_seconds()

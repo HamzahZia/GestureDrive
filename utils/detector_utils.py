@@ -58,7 +58,10 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
             p1 = (int(left), int(top))
             p2 = (int(right), int(bottom))
             
-            center = (int((int(left) + int(right)) / 2), (int(int(top) + int(bottom)) / 2))
+            x = (int(left) + int(right)) / 2
+            y = (int(top) + int(bottom)) / 2
+            center = (int(x), int(y))
+            
             print("X-coordinate: {} Y-Coordinate: {}".format(center[0], center[1]))
             cv2.rectangle(image_np, p1, p2, (77, 255, 9), 3, 1)
             return center

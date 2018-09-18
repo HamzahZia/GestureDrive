@@ -11,14 +11,12 @@ class Display():
 		self.height = 480
 		self.screen=pygame.display.set_mode((self.width, self.height))
 		pygame.display.set_caption('Tether')
+		#clock = pygame.time.Clock()
 
-#		clock = pygame.time.Clock()
-
-	def update_display(pos):
+	def update_display(self, pos):
 	    self.screen.fill(0)
 	    #pos = pygame.mouse.get_pos()
-	    pygame.draw.circle(screen, red, pos, 10, 0)
-
+	    pygame.draw.circle(self.screen, red, pos, 10, 0)
 	    pygame.display.flip()
 
 	def __del__(self):
