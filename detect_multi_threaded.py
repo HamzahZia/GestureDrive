@@ -61,14 +61,14 @@ if __name__ == '__main__':
     parser.add_argument('-ds', '--display', dest='display', type=int,
                         default=0, help='Display the detected images using OpenCV. This reduces FPS')
     parser.add_argument('-num-w', '--num-workers', dest='num_workers', type=int,
-                        default=2, help='Number of workers.')
+                        default=3, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
                         default=5, help='Size of the queue.')
     args = parser.parse_args()
 
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
-    display_q = Queue()
+    display_q = Queue(maxsize=args.queue_size)
 
     d = Display()
 
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         if (output_frame is not None):
             if (args.display > 0):
                 if (args.fps > 0):
-                    detector_utils.draw_fps_on_image(
+                    detector_utils.draw_fps_on_imwage(
                         "FPS : " + str(int(fps)), output_frame)
                 cv2.imshow('Multi-Threaded Detection', output_frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -129,9 +129,12 @@ if __name__ == '__main__':
                 if (num_frames == 400):
                     num_frames = 0
                     start_time = datetime.datetime.now()
-                #else:
-                    # print("frames processed: ",  index,
-                      #    "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
+                else:
+                    print("frames processed: ",  index,
+                        "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
+                
+                if (d.leave()):
+                    break
         else:
             # print("video end")
             break
