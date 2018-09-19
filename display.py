@@ -15,7 +15,6 @@ class Display():
 
 	def update_display(self, pos):
 	    self.screen.fill(0)
-	    #pos = pygame.mouse.get_pos()
 	    pygame.draw.circle(self.screen, red, (pos[0], 100), 10, 0)
 	    pygame.display.flip()
 
