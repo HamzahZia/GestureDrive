@@ -130,8 +130,8 @@ if __name__ == '__main__':
                     num_frames = 0
                     start_time = datetime.datetime.now()
                 else:
-                    print("frames processed: ",  index,
-                        "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
+                    #print("frames processed: ",  index,
+                    #    "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
                 
                 if (d.leave()):
                     break
