@@ -129,7 +129,7 @@ if __name__ == '__main__':
                 if (num_frames == 400):
                     num_frames = 0
                     start_time = datetime.datetime.now()
-                else:
+                #else:
                     #print("frames processed: ",  index,
                     #    "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
                 
