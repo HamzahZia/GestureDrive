@@ -1,3 +1,7 @@
+# This script belongs to VictorDibia, he wrote majority of the code
+#     I have made slight modifications to make it suitable for my program, however I am not taking
+#      credit for the bulk of the code in this file.
+
 # Utilities for object detector.
 
 import numpy as np

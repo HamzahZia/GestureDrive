@@ -1,6 +1,3 @@
-# This script belongs to VictorDibia, he wrote majority of the code
-#     I have made slight modifications to make it work for my program, however I am not taking
-#      credit for the bulk of the code in this file.
 
 from utils import detector_utils as detector_utils 
 import cv2
@@ -133,7 +130,7 @@ if __name__ == '__main__':
                     #print("frames processed: ",  index,
                     #    "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
                 
-                if (d.leave()):
+                if (d.is_done()):
                     break
         else:
             # print("video end")

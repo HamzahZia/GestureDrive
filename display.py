@@ -36,7 +36,7 @@ class Display():
 	    pygame.draw.circle(self.screen, red, (self.pos[0]*2, self.player_height), 10, 0)
 	    pygame.display.flip()
 
-	def leave(self):
+	def is_done(self):
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return 1
