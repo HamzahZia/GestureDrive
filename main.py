@@ -61,7 +61,7 @@ if __name__ == '__main__':
     parser.add_argument('-ds', '--display', dest='display', type=int,
                         default=0, help='Display the detected images using OpenCV. This reduces FPS')
     parser.add_argument('-num-w', '--num-workers', dest='num_workers', type=int,
-                        default=3, help='Number of workers.')
+                        default=4, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
                         default=5, help='Size of the queue.')
     args = parser.parse_args()
@@ -107,15 +107,15 @@ if __name__ == '__main__':
 
         output_frame = cv2.cvtColor(output_frame, cv2.COLOR_RGB2BGR)
 
-        coordinate = display_q.get()
-        if (coordinate is not None):
-            d.update_display(coordinate)
-
         elapsed_time = (datetime.datetime.now() -
                         start_time).total_seconds()
         num_frames += 1
         fps = num_frames / elapsed_time
         # print("frame ",  index, num_frames, elapsed_time, fps)
+
+        coordinate = display_q.get()
+        if (coordinate is not None):
+            d.update_pos(coordinate)
 
         if (output_frame is not None):
             if (args.display > 0):
@@ -138,6 +138,8 @@ if __name__ == '__main__':
         else:
             # print("video end")
             break
+        d.update_display()
+
     elapsed_time = (datetime.datetime.now() -
                     start_time).total_seconds()
     fps = num_frames / elapsed_time
