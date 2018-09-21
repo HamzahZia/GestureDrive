@@ -14,8 +14,13 @@ class Display():
 		self.LEFT_BOUND_LIMIT = 75
 		self.RIGHT_BOUND_LIMIT = 225
 
+		self.background = pygame.image.load('assets/mountains.png')
+		self.rect = self.background.get_rect()
+		self.rect.left = 0
+		self.rect.top = 0		
 		self.pos = (150, self.player_height) # initial position of player
 		self.screen=pygame.display.set_mode((self.width, self.height))
+
 		pygame.display.set_caption('Display')
 		#clock = pygame.time.Clock()
 
@@ -32,9 +37,10 @@ class Display():
 		self.pos = (x, y)
 
 	def update_display(self):
-	    self.screen.fill(0)
-	    pygame.draw.circle(self.screen, red, (self.pos[0]*2, self.player_height), 10, 0)
-	    pygame.display.flip()
+		self.screen.fill([255, 255, 255])
+		self.screen.blit(self.background, self.rect)
+		pygame.draw.circle(self.screen, red, (self.pos[0]*2, self.player_height), 10, 0)
+		pygame.display.flip()
 
 	def is_done(self):
 		for event in pygame.event.get():

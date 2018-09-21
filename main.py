@@ -114,6 +114,8 @@ if __name__ == '__main__':
         if (coordinate is not None):
             d.update_pos(coordinate)
 
+        d.update_display()  
+
         if (output_frame is not None):
             if (args.display > 0):
                 if (args.fps > 0):
@@ -135,7 +137,6 @@ if __name__ == '__main__':
         else:
             # print("video end")
             break
-        d.update_display()
 
     elapsed_time = (datetime.datetime.now() -
                     start_time).total_seconds()
