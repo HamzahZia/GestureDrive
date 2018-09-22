@@ -18,7 +18,7 @@ class Display():
 		self.texture_position = 0
 		self.texture_velocity = 0
 		self.texture_accelaration = 1
-		self.texture_height = 5
+		self.texture_height = 1
 
 		self.background = pygame.image.load('assets/mountains.png')
 		self.rect = self.background.get_rect()
@@ -45,11 +45,11 @@ class Display():
 	def update_display(self):
 		self.screen.fill([255, 255, 255])
 		self.screen.blit(self.background, self.rect)
-		for i in range(50):
+		for i in range(100):
 			colour = GREEN
 			if (i >= self.texture_position and i < self.texture_position + self.texture_height):
 				colour = DARK_GREEN
-			pygame.draw.rect(self.screen, colour, (0, 300 + (i*2), 600, 2))
+			pygame.draw.rect(self.screen, colour, (0, 300 + (i), 600, 1))
 		#pygame.draw.rect(self.screen, DARK_GREEN, (0, 300, 600, 10))
 
 		pygame.draw.circle(self.screen, RED, (self.pos[0]*2, self.player_height), 10, 0)
@@ -57,9 +57,11 @@ class Display():
 
 		self.texture_velocity += self.texture_accelaration
 		self.texture_position += self.texture_velocity
+		self.texture_height += 1
 		if (self.texture_position > self.height):
 			self.texture_position = 0
 			self.texture_velocity = 0
+			self.texture_height = 1
 
 	def is_done(self):
 		for event in pygame.event.get():
