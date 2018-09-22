@@ -1,7 +1,9 @@
 import pygame
 from pygame.locals import *
 
-red = (255,0,0)
+RED = (255,0,0)
+GREEN = (0, 255, 0)
+DARK_GREEN = (0, 100, 0)
 
 class Display():
 	def __init__(self):
@@ -10,9 +12,13 @@ class Display():
 		self.width = 600
 		self.height = 400
 
-		self.player_height = 350
+		self.player_height = 250
 		self.LEFT_BOUND_LIMIT = 75
 		self.RIGHT_BOUND_LIMIT = 225
+		self.texture_position = 0
+		self.texture_velocity = 0
+		self.texture_accelaration = 1
+		self.texture_height = 5
 
 		self.background = pygame.image.load('assets/mountains.png')
 		self.rect = self.background.get_rect()
@@ -39,8 +45,21 @@ class Display():
 	def update_display(self):
 		self.screen.fill([255, 255, 255])
 		self.screen.blit(self.background, self.rect)
-		pygame.draw.circle(self.screen, red, (self.pos[0]*2, self.player_height), 10, 0)
+		for i in range(50):
+			colour = GREEN
+			if (i >= self.texture_position and i < self.texture_position + self.texture_height):
+				colour = DARK_GREEN
+			pygame.draw.rect(self.screen, colour, (0, 300 + (i*2), 600, 2))
+		#pygame.draw.rect(self.screen, DARK_GREEN, (0, 300, 600, 10))
+
+		pygame.draw.circle(self.screen, RED, (self.pos[0]*2, self.player_height), 10, 0)
 		pygame.display.flip()
+
+		self.texture_velocity += self.texture_accelaration
+		self.texture_position += self.texture_velocity
+		if (self.texture_position > self.height):
+			self.texture_position = 0
+			self.texture_velocity = 0
 
 	def is_done(self):
 		for event in pygame.event.get():
