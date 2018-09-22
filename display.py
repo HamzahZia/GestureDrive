@@ -45,12 +45,13 @@ class Display():
 	def update_display(self):
 		self.screen.fill([255, 255, 255])
 		self.screen.blit(self.background, self.rect)
-		for i in range(100):
-			colour = GREEN
-			if (i >= self.texture_position and i < self.texture_position + self.texture_height):
-				colour = DARK_GREEN
-			pygame.draw.rect(self.screen, colour, (0, 300 + (i), 600, 1))
-		#pygame.draw.rect(self.screen, DARK_GREEN, (0, 300, 600, 10))
+		#for i in range(100):
+		#	colour = GREEN
+		#	if (i >= self.texture_position and i < self.texture_position + self.texture_height):
+		#		colour = DARK_GREEN
+		#	pygame.draw.rect(self.screen, colour, (0, 300 + (i), 600, 1))
+		pygame.draw.rect(self.screen, GREEN, (0, 300, 600, 100))
+		pygame.draw.rect(self.screen, DARK_GREEN, (0, 300 + self.texture_position, 600, self.texture_height))
 
 		pygame.draw.circle(self.screen, RED, (self.pos[0]*2, self.player_height), 10, 0)
 		pygame.display.flip()
