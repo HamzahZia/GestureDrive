@@ -22,7 +22,7 @@ class Texture():
 		self.velocity += self.acceleration
 		self.position += self.velocity
 		self.height += 1
-		if (self.position > height):
+		if (self.position >= height):
 			return 1
 		return 0
 
@@ -37,18 +37,29 @@ class Display():
 		self.LEFT_BOUND_LIMIT = 75
 		self.RIGHT_BOUND_LIMIT = 225
 		
+		# Variables for dealing with changing textures
 		self.textures = []
 		self.texture_count = 0 # count frames to update releasing another texture
-		self.road_pos = 300
-		self.road_curve = -1
-		self.pov = self.road_pos - 50
 
+		# Variables for dealing with hills
+		self.road_pos = 300
+		self.road_height = self.height - self.road_pos
+		self.road_curve = -1
+		self.pov = self.road_pos - 25
+
+		# Variables for dealing with curves
+		self.center_line = [0] * (self.road_height)
+		self.offset = 0
+		self.dxoffset = 0
+		self.dxxoffset = 1
+
+		# Variables for dealing with obstacles
 		self.obstacles = []
 		self.obstacles_count = 0
 
 		self.background = pygame.image.load('assets/mountains.png')
 		self.rect = self.background.get_rect()
-		self.rect.left, self.rect.top = (0, 0)		
+		self.rect.left, self.rect.top = (-100, 0)		
 		self.pos = (150, self.player_height) # initial position of player
 		self.screen=pygame.display.set_mode((self.width, self.height))
 
@@ -80,19 +91,42 @@ class Display():
 		else:
 			self.road_curve -= 1
 
+	def update_centre(self):
+		self.dxoffset += self.dxxoffset
+		self.offset += self.dxoffset
+
+		if (self.dxxoffset == 2 or self.dxxoffset == -2):
+			self.center_line.pop(0)
+			self.center_line.append(0)
+		else:
+			self.center_line.insert(0, self.offset)
+			self.center_line.pop()
+
+		if ((abs(self.offset) >= int(self.width/2) - 50) and (abs(self.dxxoffset) != 2)):
+			self.dxxoffset *= -2
+			print("HERE")
+		if (self.offset == 0):
+			self.offset = 0
+			self.dxoffset = 0
+			self.dxxoffset = 0
+
 
 	def draw_road(self, height, pos, colours):
 		for i in range(height):
-			midpoint = int(self.width/2)
+			midpoint = int(self.width/2) # Midpoint of screen
+			offset_index = (pos+i) - self.road_pos
+			if (offset_index >= 100):
+				offset_index = 99
+			midline = self.center_line[offset_index] + midpoint # Middle line that determines curve
 			obj_distance = pos + i - self.pov
 			screen_distance = self.height - self.pov
 			obj_lat = int((midpoint*obj_distance)/screen_distance)
-			inner_boundary_1 = midpoint - obj_lat
-			inner_boundary_2 = midpoint + obj_lat
+			inner_boundary_1 = midline - obj_lat
+			inner_boundary_2 = midline + obj_lat
 
 			obj_lat_2 = int(((midpoint+15)*obj_distance)/screen_distance)
-			outer_boundary_1 = midpoint - obj_lat_2
-			outer_boundary_2 = midpoint + obj_lat_2
+			outer_boundary_1 = midline - obj_lat_2
+			outer_boundary_2 = midline + obj_lat_2
 
 			pygame.draw.rect(self.screen, colours[0], (0, pos + (i), outer_boundary_1, 1)) # Grass
 			
@@ -115,8 +149,9 @@ class Display():
 	def update_display(self):
 		self.screen.blit(self.background, self.rect)
 
-		self.draw_road((self.height - self.road_pos), self.road_pos, (GREEN, RED, GRAY, WHITE))
-		#pygame.draw.rect(self.screen, GREEN, (0, self.road_pos, self.width, (self.height - self.road_pos)))
+		self.update_centre()
+		self.draw_road((self.road_height), self.road_pos, (GREEN, RED, GRAY, WHITE))
+		#pygame.draw.rect(self.screen, GREEN, (0, self.road_pos, self.width, (self.road_height)))
 
 		# Update count for each frame, every 2 frames add a new texture to Queue
 		self.texture_count += 1
