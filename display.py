@@ -51,7 +51,8 @@ class Display():
 		self.center_line = [0] * (self.road_height)
 		self.offset = 0
 		self.dxoffset = 0
-		self.dxxoffset = 1
+		self.dxxoffset = 0
+		self.straighten = 0 # Equals 1 when road curve is straightening out again
 
 		# Variables for dealing with obstacles
 		self.obstacles = []
@@ -91,25 +92,32 @@ class Display():
 		else:
 			self.road_curve -= 1
 
-	def update_centre(self):
-		self.dxoffset += self.dxxoffset
-		self.offset += self.dxoffset
+	def left_curve(self):
+		self.dxxoffset = -1
 
-		if (self.dxxoffset == 2 or self.dxxoffset == -2):
+	def right_curve(self):
+		self.dxxoffset = 1
+
+	def update_centre(self):
+		self.offset += self.dxoffset
+		self.dxoffset += self.dxxoffset
+
+		if (self.straighten == 1):
 			self.center_line.pop(0)
 			self.center_line.append(0)
+			self.rect.left += 3 # Move background to add illusion of turning curve
 		else:
 			self.center_line.insert(0, self.offset)
 			self.center_line.pop()
 
 		if ((abs(self.offset) >= int(self.width/2) - 50) and (abs(self.dxxoffset) != 2)):
-			self.dxxoffset *= -2
-			print("HERE")
-		if (self.offset == 0):
 			self.offset = 0
 			self.dxoffset = 0
 			self.dxxoffset = 0
-
+			self.straighten = 1
+		if (self.center_line[0] == 0):
+			self.straighten = 0
+		print(self.center_line[0])
 
 	def draw_road(self, height, pos, colours):
 		for i in range(height):
@@ -147,11 +155,9 @@ class Display():
 			pygame.draw.rect(self.screen, colours[0], (outer_boundary_2, pos + (i), self.width - outer_boundary_2, 1)) # Grass
 
 	def update_display(self):
-		self.screen.blit(self.background, self.rect)
-
 		self.update_centre()
+		self.screen.blit(self.background, self.rect)
 		self.draw_road((self.road_height), self.road_pos, (GREEN, RED, GRAY, WHITE))
-		#pygame.draw.rect(self.screen, GREEN, (0, self.road_pos, self.width, (self.road_height)))
 
 		# Update count for each frame, every 2 frames add a new texture to Queue
 		self.texture_count += 1
