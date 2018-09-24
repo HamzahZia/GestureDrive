@@ -13,6 +13,8 @@ DARK_GRAY = (128, 128, 128)
 TEXTURE_DIFFERENCE = 1
 OBSTACLES_DIFFERENCE = 5
 
+ROAD_PROP_DELAY = 4000
+
 class Display():
 	def __init__(self):
 		pygame.init()
@@ -29,7 +31,7 @@ class Display():
 		self.texture_count = 0 # count frames to update releasing another texture
 
 		# Variables for dealing with hills
-		self.road_pos = 230
+		self.road_pos = 250
 		self.road_height = self.height - self.road_pos
 		self.road_curve = -1
 		self.pov = self.road_pos - 25
@@ -51,8 +53,11 @@ class Display():
 		self.pos = (150, self.player_height) # initial position of player
 		self.screen=pygame.display.set_mode((self.width, self.height))
 
+		self.road_prop_event = pygame.USEREVENT + 1
+
 		pygame.display.set_caption('Display')
-		#clock = pygame.time.Clock()
+		clock = pygame.time.Clock()
+		pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
 		self.screen.fill([255, 255, 255])
 
 
@@ -68,6 +73,14 @@ class Display():
 
 		self.pos = (x, y)
 
+	def update_textures(self):
+		# Draw and update all textures i.e dark green lines that simulate 3D
+		for t in self.textures:
+			self.draw_road(t.height, (self.road_pos + t.position), (DARK_GREEN, WHITE, DARK_GRAY, DARK_GRAY))
+			#pygame.draw.rect(self.screen, DARK_GREEN, (0, self.road_pos + t.position, self.width, t.height))
+			if (t.update_texture(self.height)):
+				self.textures.pop()
+
 	def update_hills(self):
 		if (self.road_pos < 250):
 			self.road_curve = 1
@@ -81,7 +94,7 @@ class Display():
 
 	def left_curve(self):
 		self.dxxoffset = -1
-
+	
 	def right_curve(self):
 		self.dxxoffset = 1
 
@@ -90,19 +103,22 @@ class Display():
 		self.offset += self.dxoffset
 
 		if (self.straighten == 1):
-			self.center_line.pop(0)
-			self.center_line.append(0)
+			for n in range(abs(self.dxoffset)):
+				self.center_line.pop(0) # Action repeated twice to exagerate curve
+				self.center_line.append(0)
 			if (self.offset < 0):
 				self.rect.left += 3 # Move background to add illusion of turning curve
 			else:
 				self.rect.left -= 3
 
 		else:
-			self.center_line.insert(0, self.offset)
-			self.center_line.pop()
+			for n in range(abs(self.dxoffset)):
+				self.center_line.insert(0, self.offset)
+				self.center_line.pop()
 
-		if (abs(self.offset) >= int(self.width/2) - 50):
+		if (abs(self.offset) >= int(self.width/2) - 150):
 			self.straighten = 1
+			self.dxxoffset *= -1
 		if (self.center_line[0] == 0):
 			self.straighten = 0
 			self.offset = 0
@@ -163,12 +179,7 @@ class Display():
 			self.obstacles.insert(0, obstacle)
 			self.obstacles_count = 0
 
-		# Draw and update all textures i.e dark green lines that simulate 3D
-		for t in self.textures:
-			self.draw_road(t.height, (self.road_pos + t.position), (DARK_GREEN, WHITE, DARK_GRAY, DARK_GRAY))
-			#pygame.draw.rect(self.screen, DARK_GREEN, (0, self.road_pos + t.position, self.width, t.height))
-			if (t.update_texture(self.height)):
-				self.textures.pop()
+		self.update_textures()
 		
 		for o in self.obstacles:
 			pygame.draw.rect(self.screen, RED, (150, 100 + o.position, o.height, o.height))
@@ -183,13 +194,15 @@ class Display():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return 1
-			if event.type== pygame.KEYDOWN:
+			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_LEFT:
 					print("LEFT")
 					self.left_curve()
 				if event.key == pygame.K_RIGHT:
 					print("RIGHT")
 					self.right_curve()
+			if event.type == self.road_prop_event:
+				print("TREE")
 		return 0
 
 	def __del__(self):
