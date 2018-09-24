@@ -92,7 +92,8 @@ if __name__ == '__main__':
     fps = 0
     index = 0
 
-    #cv2.namedWindow('Multi-Threaded Detection', cv2.WINDOW_NORMAL)
+    if (args.display > 0):
+        cv2.namedWindow('Multi-Threaded Detection', cv2.WINDOW_NORMAL)
 
     while True:
         frame = video_capture.read()
@@ -119,7 +120,7 @@ if __name__ == '__main__':
         if (output_frame is not None):
             if (args.display > 0):
                 if (args.fps > 0):
-                    detector_utils.draw_fps_on_imwage(
+                    detector_utils.draw_fps_on_image(
                         "FPS : " + str(int(fps)), output_frame)
                 cv2.imshow('Multi-Threaded Detection', output_frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -128,12 +129,12 @@ if __name__ == '__main__':
                 if (num_frames == 400):
                     num_frames = 0
                     start_time = datetime.datetime.now()
-                #else:
-                    #print("frames processed: ",  index,
-                    #    "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
+                else:
+                    print("frames processed: ",  index,
+                        "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
                 
-                if (d.is_done()):
-                    break
+            if (d.is_done()):
+                break
         else:
             # print("video end")
             break

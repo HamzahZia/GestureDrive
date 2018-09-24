@@ -1,30 +1,17 @@
 import pygame
 from pygame.locals import *
+import spritesheet
+from texture import Texture
 
 RED = (255,0,0)
-GREEN = (0, 255, 0)
+GREEN = (0, 200, 0)
 DARK_GREEN = (0, 175, 0)
 WHITE = (255, 255, 255)
-GRAY = (175, 175, 175)
+GRAY = (150, 150, 150)
 DARK_GRAY = (128, 128, 128)
 
 TEXTURE_DIFFERENCE = 1
 OBSTACLES_DIFFERENCE = 5
-
-class Texture():
-	def __init__(self):
-		self.position = 0
-		self.velocity = 0
-		self.acceleration = 1
-		self.height = 1
-
-	def update_texture(self, height):
-		self.velocity += self.acceleration
-		self.position += self.velocity
-		self.height += 1
-		if (self.position >= height):
-			return 1
-		return 0
 
 class Display():
 	def __init__(self):
@@ -42,7 +29,7 @@ class Display():
 		self.texture_count = 0 # count frames to update releasing another texture
 
 		# Variables for dealing with hills
-		self.road_pos = 300
+		self.road_pos = 230
 		self.road_height = self.height - self.road_pos
 		self.road_curve = -1
 		self.pov = self.road_pos - 25
@@ -60,7 +47,7 @@ class Display():
 
 		self.background = pygame.image.load('assets/mountains.png')
 		self.rect = self.background.get_rect()
-		self.rect.left, self.rect.top = (-100, 0)		
+		self.rect.left, self.rect.top = (-60, 0)		
 		self.pos = (150, self.player_height) # initial position of player
 		self.screen=pygame.display.set_mode((self.width, self.height))
 
@@ -99,25 +86,28 @@ class Display():
 		self.dxxoffset = 1
 
 	def update_centre(self):
-		self.offset += self.dxoffset
 		self.dxoffset += self.dxxoffset
+		self.offset += self.dxoffset
 
 		if (self.straighten == 1):
 			self.center_line.pop(0)
 			self.center_line.append(0)
-			self.rect.left += 3 # Move background to add illusion of turning curve
+			if (self.offset < 0):
+				self.rect.left += 3 # Move background to add illusion of turning curve
+			else:
+				self.rect.left -= 3
+
 		else:
 			self.center_line.insert(0, self.offset)
 			self.center_line.pop()
 
-		if ((abs(self.offset) >= int(self.width/2) - 50) and (abs(self.dxxoffset) != 2)):
-			self.offset = 0
-			self.dxoffset = 0
-			self.dxxoffset = 0
+		if (abs(self.offset) >= int(self.width/2) - 50):
 			self.straighten = 1
 		if (self.center_line[0] == 0):
 			self.straighten = 0
-		print(self.center_line[0])
+			self.offset = 0
+			self.dxoffset = 0
+			self.dxxoffset = 0
 
 	def draw_road(self, height, pos, colours):
 		for i in range(height):
@@ -155,7 +145,8 @@ class Display():
 			pygame.draw.rect(self.screen, colours[0], (outer_boundary_2, pos + (i), self.width - outer_boundary_2, 1)) # Grass
 
 	def update_display(self):
-		self.update_centre()
+		if (self.dxxoffset != 0):
+			self.update_centre()
 		self.screen.blit(self.background, self.rect)
 		self.draw_road((self.road_height), self.road_pos, (GREEN, RED, GRAY, WHITE))
 
@@ -192,6 +183,13 @@ class Display():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return 1
+			if event.type== pygame.KEYDOWN:
+				if event.key == pygame.K_LEFT:
+					print("LEFT")
+					self.left_curve()
+				if event.key == pygame.K_RIGHT:
+					print("RIGHT")
+					self.right_curve()
 		return 0
 
 	def __del__(self):
