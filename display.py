@@ -14,7 +14,7 @@ TEXTURE_DIFFERENCE = 1
 OBSTACLES_DIFFERENCE = 5
 
 ROAD_PROP_DELAY = 4000
-ROAD_CURVE_DELAY = 15000
+ROAD_CURVE_DELAY = 18000
 
 class Display():
 	def __init__(self):
@@ -43,7 +43,7 @@ class Display():
 		self.dxoffset = 0
 		self.dxxoffset = 0
 		self.straighten = 0 # Equals 1 when road curve is straightening out again
-		self.curve_switch = 0 # Every n seconds alternate between emitting a left curve and right 
+		self.curve_switch = 1 # Every n seconds alternate between emitting a left curve and right 
 
 		# Variables for dealing with obstacles
 		self.obstacles = []
@@ -51,7 +51,7 @@ class Display():
 
 		self.background = pygame.image.load('assets/mountains.png')
 		self.rect = self.background.get_rect()
-		self.rect.left, self.rect.top = (-60, 0)		
+		self.rect.left, self.rect.top = (-40, 0)		
 		self.pos = (150, self.player_height) # initial position of player
 		self.screen=pygame.display.set_mode((self.width, self.height))
 
@@ -118,26 +118,32 @@ class Display():
 
 	def update_centre(self):
 		self.dxoffset += self.dxxoffset
-		self.offset += self.dxoffset
+		self.offset += int(self.dxoffset/4)
 
 		if (self.straighten == 1):
-			#for n in range(abs(self.dxoffset)):
-			self.center_line.pop(0) # Action repeated twice to exagerate curve
-			self.center_line.append(0)
+			for n in range(2):
+				self.center_line.pop(0) # Action repeated twice to exagerate curve
+				self.center_line.append(0)
 			if (self.offset < 0):
-				self.rect.left += 3 # Move background to add illusion of turning curve
+				self.rect.left += 2 # Move background to add illusion of turning curve
 			else:
-				self.rect.left -= 3
+				self.rect.left -= 2
 
 		else:
-			#for n in range(abs(self.dxoffset)):
-			self.center_line.insert(0, self.offset)
-			self.center_line.pop()
+			for n in range(2):
+				self.center_line.insert(0, self.offset)
+				self.center_line.pop()
 
-		if (abs(self.offset) >= int(self.width/2) - 150):
+		if (abs(self.offset) >= int(self.width/2) - 200 and self.straighten == 0):		
+			if (self.offset < 0):
+				self.rect.left += 1 # Move background to add illusion of turning curve
+			else:
+				self.rect.left -= 1
+
+		if (abs(self.offset) >= int(self.width/2) - 150 and self.straighten == 0):
 			self.straighten = 1
 			self.dxxoffset *= -1
-		if (self.center_line[0] == 0):
+		elif (self.center_line[0] == 0 and self.straighten == 1):
 			self.straighten = 0
 			self.offset = 0
 			self.dxoffset = 0
