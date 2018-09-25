@@ -14,6 +14,7 @@ TEXTURE_DIFFERENCE = 1
 OBSTACLES_DIFFERENCE = 5
 
 ROAD_PROP_DELAY = 4000
+ROAD_CURVE_DELAY = 15000
 
 class Display():
 	def __init__(self):
@@ -42,6 +43,7 @@ class Display():
 		self.dxoffset = 0
 		self.dxxoffset = 0
 		self.straighten = 0 # Equals 1 when road curve is straightening out again
+		self.curve_switch = 0 # Every n seconds alternate between emitting a left curve and right 
 
 		# Variables for dealing with obstacles
 		self.obstacles = []
@@ -54,10 +56,12 @@ class Display():
 		self.screen=pygame.display.set_mode((self.width, self.height))
 
 		self.road_prop_event = pygame.USEREVENT + 1
+		self.road_curve_event = pygame.USEREVENT + 2
 
 		pygame.display.set_caption('Display')
 		clock = pygame.time.Clock()
 		pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
+		pygame.time.set_timer(self.road_curve_event, ROAD_CURVE_DELAY)
 		self.screen.fill([255, 255, 255])
 
 		# Load in player sprites from sprite sheet
@@ -80,12 +84,12 @@ class Display():
 		elif (x > self.pos[0] + 3):
 			self.player = self.player_images[1]
 
-		#if (x < self.pos[0] - 6):
-		#	self.pos = (self.pos[0] - 3, y)
-		#elif (x > self.pos[0] + 6):
-		#	self.pos = (self.pos[0] + 3, y)
-		#else: 
-		self.pos = (x, y)
+		if (x < self.pos[0] - 10):
+			self.pos = (self.pos[0] - 10, y)
+		elif (x > self.pos[0] + 6):
+			self.pos = (self.pos[0] + 10, y)
+		else: 
+			self.pos = (x, y)
 
 	def update_textures(self):
 		# Draw and update all textures i.e dark green lines that simulate 3D
@@ -117,18 +121,18 @@ class Display():
 		self.offset += self.dxoffset
 
 		if (self.straighten == 1):
-			for n in range(abs(self.dxoffset)):
-				self.center_line.pop(0) # Action repeated twice to exagerate curve
-				self.center_line.append(0)
+			#for n in range(abs(self.dxoffset)):
+			self.center_line.pop(0) # Action repeated twice to exagerate curve
+			self.center_line.append(0)
 			if (self.offset < 0):
 				self.rect.left += 3 # Move background to add illusion of turning curve
 			else:
 				self.rect.left -= 3
 
 		else:
-			for n in range(abs(self.dxoffset)):
-				self.center_line.insert(0, self.offset)
-				self.center_line.pop()
+			#for n in range(abs(self.dxoffset)):
+			self.center_line.insert(0, self.offset)
+			self.center_line.pop()
 
 		if (abs(self.offset) >= int(self.width/2) - 150):
 			self.straighten = 1
@@ -219,6 +223,13 @@ class Display():
 					self.right_curve()
 			if event.type == self.road_prop_event:
 				print("TREE")
+			if event.type == self.road_curve_event:
+				if (self.curve_switch == 0):
+					self.left_curve()
+					self.curve_switch = 1
+				elif (self.curve_switch == 1):
+					self.right_curve()
+					self.curve_switch = 0
 		return 0
 
 	def __del__(self):
