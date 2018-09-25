@@ -22,7 +22,7 @@ class Display():
 		self.width = 600
 		self.height = 400
 
-		self.player_height = 375
+		self.player_height = 315
 		self.LEFT_BOUND_LIMIT = 75
 		self.RIGHT_BOUND_LIMIT = 225
 		
@@ -60,10 +60,10 @@ class Display():
 		pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
 		self.screen.fill([255, 255, 255])
 
-		ss = spritesheet.spritesheet('assets/cars.png')
-		self.player = ss.image_at((0, 0, 68, 40), (186, 254, 180))
-
-
+		# Load in player sprites from sprite sheet
+		ss = spritesheet.spritesheet('assets/redcar.png')
+		self.player_images = ss.images_at(((0, 0, 100, 70), (100, 0, 100, 70), (200, 0, 95, 70)), colorkey=(186, 254, 180))
+		self.player = self.player_images[0] # initialize to default straight car
 
 	def update_pos(self, pos):
 		x = pos[0]
@@ -71,10 +71,20 @@ class Display():
 
 		if (x < self.LEFT_BOUND_LIMIT):
 			x = self.LEFT_BOUND_LIMIT
-
-		if(self.RIGHT_BOUND_LIMIT < x):
+		elif(self.RIGHT_BOUND_LIMIT < x):
 			x = self.RIGHT_BOUND_LIMIT
 
+
+		if (x < self.pos[0] - 3):
+			self.player = self.player_images[2]
+		elif (x > self.pos[0] + 3):
+			self.player = self.player_images[1]
+
+		#if (x < self.pos[0] - 6):
+		#	self.pos = (self.pos[0] - 3, y)
+		#elif (x > self.pos[0] + 6):
+		#	self.pos = (self.pos[0] + 3, y)
+		#else: 
 		self.pos = (x, y)
 
 	def update_textures(self):
@@ -190,9 +200,10 @@ class Display():
 			if (o.update_texture(self.height)):
 				self.obstacles.pop()
 
-		pygame.draw.circle(self.screen, RED, (self.pos[0]*2, self.player_height), 10, 0)
-		self.screen.blit(self.player, ((self.pos[0]-34)*2, self.player_height - 20, 100, 40))
-
+		player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
+		
+		self.screen.blit(self.player, player_rect)
+		self.player = self.player_images[0] # reset car to straight position
 		pygame.display.flip()
 
 	def is_done(self):
