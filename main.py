@@ -58,7 +58,7 @@ if __name__ == '__main__':
     parser.add_argument('-ds', '--display', dest='display', type=int,
                         default=0, help='Display the detected images using OpenCV. This reduces FPS')
     parser.add_argument('-num-w', '--num-workers', dest='num_workers', type=int,
-                        default=4, help='Number of workers.')
+                        default=2, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
                         default=5, help='Size of the queue.')
     args = parser.parse_args()

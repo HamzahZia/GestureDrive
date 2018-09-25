@@ -2,7 +2,7 @@ class Texture():
 	def __init__(self):
 		self.position = 0
 		self.velocity = 0
-		self.acceleration = 1
+		self.acceleration = 1	
 		self.height = 1
 
 	def update_texture(self, height):

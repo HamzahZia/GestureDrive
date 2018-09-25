@@ -60,6 +60,10 @@ class Display():
 		pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
 		self.screen.fill([255, 255, 255])
 
+		ss = spritesheet.spritesheet('assets/cars.png')
+		self.player = ss.image_at((0, 0, 68, 40), (186, 254, 180))
+
+
 
 	def update_pos(self, pos):
 		x = pos[0]
@@ -187,6 +191,7 @@ class Display():
 				self.obstacles.pop()
 
 		pygame.draw.circle(self.screen, RED, (self.pos[0]*2, self.player_height), 10, 0)
+		self.screen.blit(self.player, ((self.pos[0]-34)*2, self.player_height - 20, 100, 40))
 
 		pygame.display.flip()
 
