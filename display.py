@@ -44,6 +44,7 @@ class Display():
 		self.dxxoffset = 0
 		self.straighten = 0 # Equals 1 when road curve is straightening out again
 		self.curve_switch = 1 # Every n seconds alternate between emitting a left curve and right 
+		self.straight_count = 0 # Variable to hold curve state before straightening out
 
 		# Variables for dealing with obstacles
 		self.obstacles = []
@@ -65,9 +66,13 @@ class Display():
 		self.screen.fill([255, 255, 255])
 
 		# Load in player sprites from sprite sheet
-		ss = spritesheet.spritesheet('assets/redcar.png')
-		self.player_images = ss.images_at(((0, 0, 100, 70), (100, 0, 100, 70), (200, 0, 95, 70)), colorkey=(186, 254, 180))
+		player_ss = spritesheet.spritesheet('assets/redcar.png')
+		self.player_images = player_ss.images_at(((0, 0, 100, 70), (100, 0, 100, 70), (200, 0, 95, 70)), colorkey=(186, 254, 180))
 		self.player = self.player_images[0] # initialize to default straight car
+		self.tree_ss = spritesheet.spritesheet('assets/tree.jpg')
+		self.tree = self.tree_ss.image_at((0, 0, 900, 1200))
+		self.bluecar_ss = spritesheet.spritesheet('assets/bluecar.png')
+		self.bluecar = self.bluecar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
 
 	def update_pos(self, pos):
 		x = pos[0]
@@ -121,14 +126,18 @@ class Display():
 		self.offset += int(self.dxoffset/4)
 
 		if (self.straighten == 1):
-			for n in range(2):
-				self.center_line.pop(0) # Action repeated twice to exagerate curve
-				self.center_line.append(0)
+			if (self.straight_count == 10 or self.straight_count == 0):
+				self.straight_count == 0
+				for n in range(2):
+					self.center_line.pop(0) # Action repeated twice to exagerate curve
+					self.center_line.append(0)
+			elif (self.straight_count > 0):
+				self.straight_count += 1
+
 			if (self.offset < 0):
 				self.rect.left += 2 # Move background to add illusion of turning curve
 			else:
 				self.rect.left -= 2
-
 		else:
 			for n in range(2):
 				self.center_line.insert(0, self.offset)
@@ -142,7 +151,7 @@ class Display():
 
 		if (abs(self.offset) >= int(self.width/2) - 150 and self.straighten == 0):
 			self.straighten = 1
-			self.dxxoffset *= -1
+			self.straight_count = 1
 		elif (self.center_line[0] == 0 and self.straighten == 1):
 			self.straighten = 0
 			self.offset = 0
@@ -153,8 +162,8 @@ class Display():
 		for i in range(height):
 			midpoint = int(self.width/2) # Midpoint of screen
 			offset_index = (pos+i) - self.road_pos
-			if (offset_index >= 100):
-				offset_index = 99
+			if (offset_index >= self.road_height):
+				offset_index = self.road_height - 1
 			midline = self.center_line[offset_index] + midpoint # Middle line that determines curve
 			obj_distance = pos + i - self.pov
 			screen_distance = self.height - self.pov
@@ -206,12 +215,19 @@ class Display():
 		self.update_textures()
 		
 		for o in self.obstacles:
-			pygame.draw.rect(self.screen, RED, (150, 100 + o.position, o.height, o.height))
+			print("HERE")
+			o_index =  o.position
+			if (o_index >= self.road_height):
+				o_index = self.road_height - 1
+			pygame.draw.rect(self.screen, RED, (self.center_line[o_index], self.road_pos + o.position, o.height, o.height))
 			if (o.update_texture(self.height)):
 				self.obstacles.pop()
+		
+		#tree_rect = pygame.Rect(100, 100, 10, 7)
+		#self.screen.blit(self.tree, tree_rect)
 
 		player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
-		
+		#self.screen.blit(self.bluecar, (50, self.player_height, 100, 67))
 		self.screen.blit(self.player, player_rect)
 		self.player = self.player_images[0] # reset car to straight position
 		pygame.display.flip()
