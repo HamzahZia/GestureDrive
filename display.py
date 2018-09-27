@@ -11,7 +11,8 @@ GRAY = (150, 150, 150)
 DARK_GRAY = (128, 128, 128)
 
 TEXTURE_DIFFERENCE = 1
-OBSTACLES_DIFFERENCE = 5
+OBSTACLES_DIFFERENCE = 10
+TREE_MULTIPLIER = 10
 
 ROAD_PROP_DELAY = 4000
 ROAD_CURVE_DELAY = 18000
@@ -134,10 +135,11 @@ class Display():
 			elif (self.straight_count > 0):
 				self.straight_count += 1
 
-			if (self.offset < 0):
-				self.rect.left += 2 # Move background to add illusion of turning curve
-			else:
-				self.rect.left -= 2
+			if (self.center_line[10] != 0):
+				if (self.offset < 0):
+					self.rect.left += 2 # Move background to add illusion of turning curve
+				else:
+					self.rect.left -= 2
 		else:
 			for n in range(2):
 				self.center_line.insert(0, self.offset)
@@ -158,22 +160,27 @@ class Display():
 			self.dxoffset = 0
 			self.dxxoffset = 0
 
+	def line_calculation(self, loc):
+		midpoint = int(self.width/2) # Midpoint of screen
+		offset_index = loc - self.road_pos
+		if (offset_index >= self.road_height):
+			offset_index = self.road_height - 1
+		midline = self.center_line[offset_index] + midpoint # Middle line that determines curve
+		obj_distance = loc - self.pov
+		screen_distance = self.height - self.pov
+		obj_lat = int((midpoint*obj_distance)/screen_distance)
+		inner_boundary_1 = midline - obj_lat
+		inner_boundary_2 = midline + obj_lat
+
+		obj_lat_2 = int(((midpoint+15)*obj_distance)/screen_distance)
+		outer_boundary_1 = midline - obj_lat_2
+		outer_boundary_2 = midline + obj_lat_2
+
+		return (inner_boundary_1, inner_boundary_2, outer_boundary_1, outer_boundary_2)
+
 	def draw_road(self, height, pos, colours):
 		for i in range(height):
-			midpoint = int(self.width/2) # Midpoint of screen
-			offset_index = (pos+i) - self.road_pos
-			if (offset_index >= self.road_height):
-				offset_index = self.road_height - 1
-			midline = self.center_line[offset_index] + midpoint # Middle line that determines curve
-			obj_distance = pos + i - self.pov
-			screen_distance = self.height - self.pov
-			obj_lat = int((midpoint*obj_distance)/screen_distance)
-			inner_boundary_1 = midline - obj_lat
-			inner_boundary_2 = midline + obj_lat
-
-			obj_lat_2 = int(((midpoint+15)*obj_distance)/screen_distance)
-			outer_boundary_1 = midline - obj_lat_2
-			outer_boundary_2 = midline + obj_lat_2
+			(inner_boundary_1, inner_boundary_2, outer_boundary_1, outer_boundary_2) = self.line_calculation(pos+i)
 
 			pygame.draw.rect(self.screen, colours[0], (0, pos + (i), outer_boundary_1, 1)) # Grass
 			
@@ -215,16 +222,17 @@ class Display():
 		self.update_textures()
 		
 		for o in self.obstacles:
-			print("HERE")
 			o_index =  o.position
 			if (o_index >= self.road_height):
 				o_index = self.road_height - 1
-			pygame.draw.rect(self.screen, RED, (self.center_line[o_index], self.road_pos + o.position, o.height, o.height))
+
+			o_width = int((o.height/4) * 3) * TREE_MULTIPLIER
+			o_height = o.height * TREE_MULTIPLIER
+			tree = pygame.transform.scale(self.tree, (o_width, o_height))
+			o_pos = self.width/2 + self.center_line[o_index] - 100
+			self.screen.blit(tree, (o_pos, self.road_pos + o.position, o_width, o_height))
 			if (o.update_texture(self.height)):
 				self.obstacles.pop()
-		
-		#tree_rect = pygame.Rect(100, 100, 10, 7)
-		#self.screen.blit(self.tree, tree_rect)
 
 		player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
 		#self.screen.blit(self.bluecar, (50, self.player_height, 100, 67))
