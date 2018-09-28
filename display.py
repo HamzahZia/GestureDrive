@@ -13,11 +13,11 @@ DARK_GRAY = (128, 128, 128)
 
 TEXTURE_DIFFERENCE = 1
 TREE_MULTIPLIER = 10
+CAR_MULTIPLIER = 4
 
 ROAD_PROP_DELAY = 2000
+ROAD_OBSTACLE_DELAY = 3000
 ROAD_CURVE_DELAY = 18000
-
-#random.seed()
 
 class Display():
 	def __init__(self):
@@ -49,6 +49,8 @@ class Display():
 		self.curve_switch = 1 # Every n seconds alternate between emitting a left curve and right 
 		self.straight_count = 0 # Variable to hold curve state before straightening out
 
+		# Variables for dealing with props
+		self.props = []
 		# Variables for dealing with obstacles
 		self.obstacles = []
 
@@ -60,11 +62,13 @@ class Display():
 
 		self.road_prop_event = pygame.USEREVENT + 1
 		self.road_curve_event = pygame.USEREVENT + 2
+		self.road_obstacle_event = pygame.USEREVENT + 3
 
 		pygame.display.set_caption('Display')
 		clock = pygame.time.Clock()
 		pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
 		pygame.time.set_timer(self.road_curve_event, ROAD_CURVE_DELAY)
+		pygame.time.set_timer(self.road_obstacle_event, ROAD_OBSTACLE_DELAY)
 		self.screen.fill([255, 255, 255])
 
 		# Load in player sprites from sprite sheet
@@ -106,8 +110,8 @@ class Display():
 			if (t.update_texture(self.height)):
 				self.textures.pop()
 
-	def update_obstacles(self):
-		for o in self.obstacles:
+	def update_props(self):
+		for o in self.props:
 			o_width = int((o.height/4) * 3) * TREE_MULTIPLIER
 			o_height = o.height * TREE_MULTIPLIER
 			tree = pygame.transform.scale(self.tree, (o_width, o_height))
@@ -120,7 +124,21 @@ class Display():
 			tree_rect = pygame.Rect((o_x, self.road_pos + o.position - o_height, o_width, o_height))
 			self.screen.blit(tree, tree_rect)
 			if (o.update_texture(self.height)):
-				self.obstacles.pop()
+				self.props.pop()
+
+	def update_obstacles(self):
+			for o in self.obstacles:
+				o_width = int((o.height/67) * 100) * CAR_MULTIPLIER
+				o_height = o.height * CAR_MULTIPLIER
+				bluecar = pygame.transform.scale(self.bluecar, (o_width, o_height))
+				(ib_1, ib_2, ob_1, ob_2) = self.line_calculation(self.road_pos + o.position)
+				offset = int((3*(ib_2 - ib_1)/6) - o_width/2)
+				o_x = ib_1 + offset
+				
+				obst_rect = pygame.Rect((o_x, self.road_pos + o.position - o_height, o_width, o_height))
+				self.screen.blit(bluecar, obst_rect)
+				if (o.update_texture(self.height)):
+					self.obstacles.pop()
 
 	def update_hills(self):
 		if (self.road_pos < 250):
@@ -231,7 +249,7 @@ class Display():
 			self.texture_count = 0
 
 		self.update_textures()
-		
+		self.update_props()
 		self.update_obstacles()
 
 		player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
@@ -250,14 +268,12 @@ class Display():
 				if event.key == pygame.K_RIGHT:
 					self.right_curve()
 			if event.type == self.road_prop_event:
-				obstacle = Texture() # left tree
-				obstacle.set_offset(-1)
-				self.obstacles.insert(0, obstacle)
-				print("HERE")
-				obstacle2 = Texture() # right tree
-				obstacle2.set_offset(1)
-				self.obstacles.insert(0, obstacle2)
-				print("HERE2")
+				prop = Texture() # left tree
+				prop.set_offset(-1)
+				self.props.insert(0, prop)
+				prop2 = Texture() # right tree
+				prop2.set_offset(1)
+				self.props.insert(0, prop2)
 			if event.type == self.road_curve_event:
 				if (self.curve_switch == 0):
 					self.left_curve()
@@ -265,6 +281,9 @@ class Display():
 				elif (self.curve_switch == 1):
 					self.right_curve()
 					self.curve_switch = 0
+			if event.type == self.road_obstacle_event:
+				obstacle = Texture() # left tree
+				self.obstacles.insert(0, obstacle)
 		return 0
 
 	def __del__(self):
