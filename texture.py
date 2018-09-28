@@ -4,6 +4,10 @@ class Texture():
 		self.velocity = 0
 		self.acceleration = 1	
 		self.height = 1
+		self.offset = 0
+
+	def set_offset(self, offset):
+		self.offset = offset
 
 	def update_texture(self, height):
 		self.velocity += self.acceleration

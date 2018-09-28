@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 import spritesheet
 from texture import Texture
+import random
 
 RED = (255,0,0)
 GREEN = (0, 200, 0)
@@ -15,6 +16,8 @@ TREE_MULTIPLIER = 10
 
 ROAD_PROP_DELAY = 2000
 ROAD_CURVE_DELAY = 18000
+
+#random.seed()
 
 class Display():
 	def __init__(self):
@@ -48,7 +51,6 @@ class Display():
 
 		# Variables for dealing with obstacles
 		self.obstacles = []
-		self.obstacles_count = 0
 
 		self.background = pygame.image.load('assets/mountains.png')
 		self.rect = self.background.get_rect()
@@ -110,8 +112,13 @@ class Display():
 			o_height = o.height * TREE_MULTIPLIER
 			tree = pygame.transform.scale(self.tree, (o_width, o_height))
 			(ib_1, ib_2, ob_1, ob_2) = self.line_calculation(self.road_pos + o.position)
-			o_x = ob_1 - 90
-			self.screen.blit(tree, (o_x, self.road_pos + o.position - o_height, o_width, o_height))
+			if (o.offset > 0):
+				o_x = ob_2 + 30
+			elif (o.offset < 0):
+				o_x = ob_1 - 100
+			
+			tree_rect = pygame.Rect((o_x, self.road_pos + o.position - o_height, o_width, o_height))
+			self.screen.blit(tree, tree_rect)
 			if (o.update_texture(self.height)):
 				self.obstacles.pop()
 
@@ -239,15 +246,18 @@ class Display():
 				return 1
 			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_LEFT:
-					print("LEFT")
 					self.left_curve()
 				if event.key == pygame.K_RIGHT:
-					print("RIGHT")
 					self.right_curve()
-			if event.type == self.road_prop_event:	
-				obstacle = Texture()
+			if event.type == self.road_prop_event:
+				obstacle = Texture() # left tree
+				obstacle.set_offset(-1)
 				self.obstacles.insert(0, obstacle)
-				self.obstacles_count = 0
+				print("HERE")
+				obstacle2 = Texture() # right tree
+				obstacle2.set_offset(1)
+				self.obstacles.insert(0, obstacle2)
+				print("HERE2")
 			if event.type == self.road_curve_event:
 				if (self.curve_switch == 0):
 					self.left_curve()
