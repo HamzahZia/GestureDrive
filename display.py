@@ -13,11 +13,15 @@ DARK_GRAY = (128, 128, 128)
 
 TEXTURE_DIFFERENCE = 1
 TREE_MULTIPLIER = 10
+ROCK_MULTIPLIER = 5
 CAR_MULTIPLIER = 4
+SPEEDSIGN_MULTIPLIER = 10
 
 ROAD_PROP_DELAY = 2000
 ROAD_OBSTACLE_DELAY = 3000
 ROAD_CURVE_DELAY = 18000
+
+random.seed()
 
 class Display():
 	def __init__(self):
@@ -75,8 +79,12 @@ class Display():
 		player_ss = spritesheet.spritesheet('assets/redcar.png')
 		self.player_images = player_ss.images_at(((0, 0, 100, 70), (100, 0, 100, 70), (200, 0, 95, 70)), colorkey=(186, 254, 180))
 		self.player = self.player_images[0] # initialize to default straight car
-		self.tree_ss = spritesheet.spritesheet('assets/tree.jpg')
-		self.tree = self.tree_ss.image_at((0, 0, 900, 1200), colorkey=(255, 255, 255))
+		self.tree_ss = spritesheet.spritesheet('assets/tree.png')
+		self.tree = self.tree_ss.image_at((0, 0, 1814, 2400), colorkey=(0, 0, 0))
+		self.rock_ss = spritesheet.spritesheet('assets/rock.png')
+		self.rock = self.rock_ss.image_at((0, 0, 720, 500), colorkey=(0, 0, 0))
+		self.speedsign_ss = spritesheet.spritesheet('assets/speedsign.jpg')
+		self.speedsign = self.speedsign_ss.image_at((0, 0, 141, 200), colorkey=(0, 255, 0))
 		self.bluecar_ss = spritesheet.spritesheet('assets/bluecar.png')
 		self.bluecar = self.bluecar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
 
@@ -112,17 +120,29 @@ class Display():
 
 	def update_props(self):
 		for o in self.props:
-			o_width = int((o.height/4) * 3) * TREE_MULTIPLIER
-			o_height = o.height * TREE_MULTIPLIER
-			tree = pygame.transform.scale(self.tree, (o_width, o_height))
 			(ib_1, ib_2, ob_1, ob_2) = self.line_calculation(self.road_pos + o.position)
 			if (o.offset > 0):
 				o_x = ob_2 + 30
 			elif (o.offset < 0):
 				o_x = ob_1 - 100
 			
-			tree_rect = pygame.Rect((o_x, self.road_pos + o.position - o_height, o_width, o_height))
-			self.screen.blit(tree, tree_rect)
+			if (o.type == "tree"):
+				o_width = int((o.height/4) * 3) * TREE_MULTIPLIER
+				o_height = o.height * TREE_MULTIPLIER
+				prop = pygame.transform.scale(self.tree, (o_width, o_height))				
+				prop_rect = pygame.Rect((o_x, self.road_pos + o.position - o_height, o_width, o_height))
+			elif (o.type == "rock"):
+				o_width = int((o.height/25) * 36) * ROCK_MULTIPLIER
+				o_height = o.height * ROCK_MULTIPLIER
+				prop = pygame.transform.scale(self.rock, (o_width, o_height))				
+				prop_rect = pygame.Rect((o_x, self.road_pos + o.position - o_height, o_width, o_height))
+			elif (o.type == "speedsign"):
+				o_width = int((o.height/10) * 7) * SPEEDSIGN_MULTIPLIER
+				o_height = o.height * SPEEDSIGN_MULTIPLIER
+				prop = pygame.transform.scale(self.speedsign, (o_width, o_height))				
+				prop_rect = pygame.Rect((o_x, self.road_pos + o.position - o_height, o_width, o_height))
+			
+			self.screen.blit(prop, prop_rect)
 			if (o.update_texture(self.height)):
 				self.props.pop()
 
@@ -268,12 +288,28 @@ class Display():
 				if event.key == pygame.K_RIGHT:
 					self.right_curve()
 			if event.type == self.road_prop_event:
-				prop = Texture() # left tree
-				prop.set_offset(-1)
-				self.props.insert(0, prop)
-				prop2 = Texture() # right tree
-				prop2.set_offset(1)
-				self.props.insert(0, prop2)
+				choice = random.randint(1,5)
+				if choice < 4:
+					prop = Texture() # left tree
+					prop.set_type("tree")
+					prop.set_offset(-1)
+					prop.set_boost(4)
+					self.props.insert(0, prop)
+					prop2 = Texture() # right tree
+					prop2.set_type("tree")
+					prop2.set_boost(4)
+					prop2.set_offset(1)
+					self.props.insert(0, prop2)
+				else:
+					prop = Texture() # rock
+					prop.set_type("speedsign")
+					if (choice == 4):
+						prop.set_offset(-1)
+					elif (choice == 5):
+						prop.set_offset(1)
+					prop.set_boost(4)
+					self.props.insert(0, prop)
+
 			if event.type == self.road_curve_event:
 				if (self.curve_switch == 0):
 					self.left_curve()
