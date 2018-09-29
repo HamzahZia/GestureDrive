@@ -20,6 +20,7 @@ SPEEDSIGN_MULTIPLIER = 10
 ROAD_PROP_DELAY = 2000
 ROAD_OBSTACLE_DELAY = 3000
 ROAD_CURVE_DELAY = 18000
+ROAD_SIGN_DELAY = 23000
 
 random.seed()
 
@@ -67,12 +68,14 @@ class Display():
 		self.road_prop_event = pygame.USEREVENT + 1
 		self.road_curve_event = pygame.USEREVENT + 2
 		self.road_obstacle_event = pygame.USEREVENT + 3
+		self.road_sign_event = pygame.USEREVENT + 4
 
 		pygame.display.set_caption('Display')
 		clock = pygame.time.Clock()
 		pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
 		pygame.time.set_timer(self.road_curve_event, ROAD_CURVE_DELAY)
 		pygame.time.set_timer(self.road_obstacle_event, ROAD_OBSTACLE_DELAY)
+		pygame.time.set_timer(self.road_sign_event, ROAD_SIGN_DELAY)
 		self.screen.fill([255, 255, 255])
 
 		# Load in player sprites from sprite sheet
@@ -83,8 +86,8 @@ class Display():
 		self.tree = self.tree_ss.image_at((0, 0, 1814, 2400), colorkey=(0, 0, 0))
 		self.rock_ss = spritesheet.spritesheet('assets/rock.png')
 		self.rock = self.rock_ss.image_at((0, 0, 720, 500), colorkey=(0, 0, 0))
-		self.speedsign_ss = spritesheet.spritesheet('assets/speedsign.jpg')
-		self.speedsign = self.speedsign_ss.image_at((0, 0, 141, 200), colorkey=(0, 255, 0))
+		self.speedsign_ss = spritesheet.spritesheet('assets/speedsign.png')
+		self.speedsign = self.speedsign_ss.image_at((0, 0, 141, 200), colorkey=(255, 255, 255))
 		self.bluecar_ss = spritesheet.spritesheet('assets/bluecar.png')
 		self.bluecar = self.bluecar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
 
@@ -139,7 +142,8 @@ class Display():
 			elif (o.type == "speedsign"):
 				o_width = int((o.height/10) * 7) * SPEEDSIGN_MULTIPLIER
 				o_height = o.height * SPEEDSIGN_MULTIPLIER
-				prop = pygame.transform.scale(self.speedsign, (o_width, o_height))				
+				prop = pygame.transform.scale(self.speedsign, (o_width, o_height))	
+				o_x = ob_2 + 5			
 				prop_rect = pygame.Rect((o_x, self.road_pos + o.position - o_height, o_width, o_height))
 			
 			self.screen.blit(prop, prop_rect)
@@ -302,13 +306,18 @@ class Display():
 					self.props.insert(0, prop2)
 				else:
 					prop = Texture() # rock
-					prop.set_type("speedsign")
+					prop.set_type("rock")
 					if (choice == 4):
 						prop.set_offset(-1)
 					elif (choice == 5):
 						prop.set_offset(1)
 					prop.set_boost(4)
 					self.props.insert(0, prop)
+			if event.type == self.road_sign_event:
+				prop = Texture() # rock
+				prop.set_type("speedsign")
+				prop.set_boost(4)
+				self.props.insert(0, prop)
 
 			if event.type == self.road_curve_event:
 				if (self.curve_switch == 0):
