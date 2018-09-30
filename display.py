@@ -11,6 +11,7 @@ WHITE = (255, 255, 255)
 GRAY = (150, 150, 150)
 DARK_GRAY = (128, 128, 128)
 
+TEXT_HEIGHT = 40
 TEXTURE_DIFFERENCE = 1
 TREE_MULTIPLIER = 10
 ROCK_MULTIPLIER = 5
@@ -27,7 +28,7 @@ random.seed()
 class Display():
 	def __init__(self):
 		pygame.init()
-
+		self.fontObj = pygame.font.Font('assets/PressStart2P.ttf', 20)
 		self.width = 600
 		self.height = 400
 
@@ -192,7 +193,7 @@ class Display():
 	def right_curve(self):
 		self.dxxoffset = 1
 
-	def update_centre(self):
+	def update_center(self):
 		self.dxoffset += self.dxxoffset
 		self.offset += int(self.dxoffset/4)
 
@@ -272,7 +273,7 @@ class Display():
 
 	def update_display(self):
 		if (self.dxxoffset != 0):
-			self.update_centre()
+			self.update_center()
 		self.screen.blit(self.background, self.rect)
 		self.draw_road((self.road_height), self.road_pos, (GREEN, RED, GRAY, WHITE))
 
@@ -286,6 +287,30 @@ class Display():
 		self.update_textures()
 		self.update_props()
 		self.update_obstacles()
+
+		score_surface = self.fontObj.render('SCORE: 5', True, (255, 255, 0))
+		score_rect = score_surface.get_rect()
+		score_rect.center  = (self.width/2, TEXT_HEIGHT)
+		score_outline = self.fontObj.render('SCORE: 5', True, (0, 0, 0))
+		outline_rect = score_outline.get_rect()
+		outline_rect.center = (self.width/2 - 1, TEXT_HEIGHT)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (self.width/2 + 1, TEXT_HEIGHT)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (self.width/2 - 1, TEXT_HEIGHT - 1)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (self.width/2 - 1, TEXT_HEIGHT + 1)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (self.width/2 + 1, TEXT_HEIGHT - 1)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (self.width/2 + 1, TEXT_HEIGHT + 1)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (self.width/2, TEXT_HEIGHT - 1)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (self.width/2, TEXT_HEIGHT + 2)
+		self.screen.blit(score_outline, outline_rect)
+		
+		self.screen.blit(score_surface, score_rect)
 
 		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
 		self.screen.blit(self.player, self.player_rect)
