@@ -63,6 +63,7 @@ class Display():
 		self.rect = self.background.get_rect()
 		self.rect.left, self.rect.top = (-40, 0)		
 		self.pos = (150, self.player_height) # initial position of player
+		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
 		self.screen=pygame.display.set_mode((self.width, self.height))
 
 		self.road_prop_event = pygame.USEREVENT + 1
@@ -78,7 +79,7 @@ class Display():
 		pygame.time.set_timer(self.road_sign_event, ROAD_SIGN_DELAY)
 		self.screen.fill([255, 255, 255])
 
-		# Load in player sprites from sprite sheet
+		# Load in assets
 		player_ss = spritesheet.spritesheet('assets/redcar.png')
 		self.player_images = player_ss.images_at(((0, 0, 100, 70), (100, 0, 100, 70), (200, 0, 95, 70)), colorkey=(186, 254, 180))
 		self.player = self.player_images[0] # initialize to default straight car
@@ -90,6 +91,13 @@ class Display():
 		self.speedsign = self.speedsign_ss.image_at((0, 0, 141, 200), colorkey=(255, 255, 255))
 		self.bluecar_ss = spritesheet.spritesheet('assets/bluecar.png')
 		self.bluecar = self.bluecar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
+		self.graycar_ss = spritesheet.spritesheet('assets/graycar.png')
+		self.graycar = self.graycar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
+		self.purplecar_ss = spritesheet.spritesheet('assets/purplecar.png')
+		self.purplecar = self.purplecar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
+		self.greencar_ss = spritesheet.spritesheet('assets/greencar.png')
+		self.greencar = self.greencar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
+		self.cars = (self.bluecar, self.graycar, self.purplecar, self.greencar)
 
 	def update_pos(self, pos):
 		x = pos[0]
@@ -154,13 +162,16 @@ class Display():
 			for o in self.obstacles:
 				o_width = int((o.height/67) * 100) * CAR_MULTIPLIER
 				o_height = o.height * CAR_MULTIPLIER
-				bluecar = pygame.transform.scale(self.bluecar, (o_width, o_height))
 				(ib_1, ib_2, ob_1, ob_2) = self.line_calculation(self.road_pos + o.position)
-				offset = int((3*(ib_2 - ib_1)/6) - o_width/2)
+				offset = int((o.offset*(ib_2 - ib_1)/6) - o_width/2)
 				o_x = ib_1 + offset
-				
-				obst_rect = pygame.Rect((o_x, self.road_pos + o.position - o_height, o_width, o_height))
-				self.screen.blit(bluecar, obst_rect)
+				o_y = self.road_pos + o.position - o_height
+				car = pygame.transform.scale(self.cars[o.type], (o_width, o_height))
+				obst_rect = pygame.Rect((o_x, o_y, o_width, o_height))
+				self.screen.blit(car, obst_rect)
+				if (o_y >= self.player_height - 15):
+					if(self.player_rect.colliderect(obst_rect)):
+						print("LOSE")
 				if (o.update_texture(self.height)):
 					self.obstacles.pop()
 
@@ -276,9 +287,8 @@ class Display():
 		self.update_props()
 		self.update_obstacles()
 
-		player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
-		#self.screen.blit(self.bluecar, (50, self.player_height, 100, 67))
-		self.screen.blit(self.player, player_rect)
+		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
+		self.screen.blit(self.player, self.player_rect)
 		self.player = self.player_images[0] # reset car to straight position
 		pygame.display.flip()
 
@@ -327,8 +337,15 @@ class Display():
 					self.right_curve()
 					self.curve_switch = 0
 			if event.type == self.road_obstacle_event:
-				obstacle = Texture() # left tree
-				self.obstacles.insert(0, obstacle)
+				num_cars = random.randint(1, 2)
+				choice = random.sample((1,3,5), num_cars)
+				for i in range(num_cars):
+					obstacle = Texture() # left tree
+					obstacle.set_offset(choice[i])
+					type = random.choice(range(len(self.cars)))
+					obstacle.set_type(type)
+					self.obstacles.insert(0, obstacle)
+
 		return 0
 
 	def __del__(self):

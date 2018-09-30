@@ -16,6 +16,9 @@ class Texture():
 	def set_type(self, type):
 		self.type = type
 
+	def set_car(self, car):
+		self.car = car
+
 	def update_texture(self, height):
 		self.velocity += self.acceleration
 		self.position += self.velocity + self.boost
