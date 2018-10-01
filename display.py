@@ -35,7 +35,7 @@ class Display():
 		self.player_height = 315
 		self.LEFT_BOUND_LIMIT = 75
 		self.RIGHT_BOUND_LIMIT = 225
-		
+		self.score = 0		
 		# Variables for dealing with changing textures
 		self.textures = []
 		self.texture_count = 0 # count frames to update releasing another texture
@@ -74,10 +74,6 @@ class Display():
 
 		pygame.display.set_caption('Display')
 		clock = pygame.time.Clock()
-		pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
-		pygame.time.set_timer(self.road_curve_event, ROAD_CURVE_DELAY)
-		pygame.time.set_timer(self.road_obstacle_event, ROAD_OBSTACLE_DELAY)
-		pygame.time.set_timer(self.road_sign_event, ROAD_SIGN_DELAY)
 		self.screen.fill([255, 255, 255])
 
 		# Load in assets
@@ -317,15 +313,22 @@ class Display():
 		self.player = self.player_images[0] # reset car to straight position
 		pygame.display.flip()
 
+	def draw_menu(self):
+		self.screen.blit(self.background, self.rect)
+		self.draw_road((self.road_height), self.road_pos, (GREEN, RED, GRAY, WHITE))
+		pygame.display.flip()
+
 	def is_done(self):
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return 1
 			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_LEFT:
-					self.left_curve()
-				if event.key == pygame.K_RIGHT:
-					self.right_curve()
+					pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
+					pygame.time.set_timer(self.road_curve_event, ROAD_CURVE_DELAY)
+					pygame.time.set_timer(self.road_obstacle_event, ROAD_OBSTACLE_DELAY)
+					pygame.time.set_timer(self.road_sign_event, ROAD_SIGN_DELAY)
+					return 2
 			if event.type == self.road_prop_event:
 				choice = random.randint(1,5)
 				if choice < 4:

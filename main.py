@@ -95,6 +95,7 @@ if __name__ == '__main__':
     if (args.display > 0):
         cv2.namedWindow('Multi-Threaded Detection', cv2.WINDOW_NORMAL)
 
+    start_game = False
     while True:
         frame = video_capture.read()
         frame = cv2.flip(frame, 1)
@@ -115,7 +116,10 @@ if __name__ == '__main__':
         if (coordinate is not None):
             d.update_pos(coordinate)
 
-        d.update_display()  
+        if (start_game == True):
+            d.update_display()  
+        else:
+            d.draw_menu()
 
         if (output_frame is not None):
             if (args.display > 0):
@@ -132,9 +136,11 @@ if __name__ == '__main__':
                 else:
                     print("frames processed: ",  index,
                         "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
-                
-            if (d.is_done()):
+            status = d.is_done()
+            if (status == 1):
                 break
+            elif (status == 2):
+                start_game = True
         else:
             # print("video end")
             break
