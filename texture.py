@@ -16,13 +16,10 @@ class Texture():
 	def set_type(self, type):
 		self.type = type
 
-	def set_car(self, car):
-		self.car = car
-
 	def update_texture(self, height):
 		self.velocity += self.acceleration
 		self.position += self.velocity + self.boost
 		self.height += self.acceleration
 		if (self.position >= height):
-			return 1
-		return 0
+			return True
+		return False

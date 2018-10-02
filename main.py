@@ -141,6 +141,8 @@ if __name__ == '__main__':
                 break
             elif (status == 2):
                 start_game = True
+            elif (status == 3):
+                start_game = False
         else:
             # print("video end")
             break

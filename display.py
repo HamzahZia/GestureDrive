@@ -31,6 +31,7 @@ class Display():
 		self.fontObj = pygame.font.Font('assets/PressStart2P.ttf', 20)
 		self.width = 600
 		self.height = 400
+		self.lost = False
 
 		self.player_height = 315
 		self.LEFT_BOUND_LIMIT = 75
@@ -156,6 +157,7 @@ class Display():
 				self.props.pop()
 
 	def update_obstacles(self):
+			score_given = False
 			for o in self.obstacles:
 				o_width = int((o.height/67) * 100) * CAR_MULTIPLIER
 				o_height = o.height * CAR_MULTIPLIER
@@ -168,9 +170,12 @@ class Display():
 				self.screen.blit(car, obst_rect)
 				if (o_y >= self.player_height - 15):
 					if(self.player_rect.colliderect(obst_rect)):
-						print("LOSE")
+						self.lost = True
 				if (o.update_texture(self.height)):
 					self.obstacles.pop()
+					if (score_given == False):
+						self.score += 1
+						score_given = True
 
 	def update_hills(self):
 		if (self.road_pos < 250):
@@ -284,10 +289,11 @@ class Display():
 		self.update_props()
 		self.update_obstacles()
 
-		score_surface = self.fontObj.render('SCORE: 5', True, (255, 255, 0))
+		score = 'SCORE:%d'% self.score
+		score_surface = self.fontObj.render(score, True, (255, 255, 0))
 		score_rect = score_surface.get_rect()
 		score_rect.center  = (self.width/2, TEXT_HEIGHT)
-		score_outline = self.fontObj.render('SCORE: 5', True, (0, 0, 0))
+		score_outline = self.fontObj.render(score, True, (0, 0, 0))
 		outline_rect = score_outline.get_rect()
 		outline_rect.center = (self.width/2 - 1, TEXT_HEIGHT)
 		self.screen.blit(score_outline, outline_rect)
@@ -319,6 +325,10 @@ class Display():
 		pygame.display.flip()
 
 	def is_done(self):
+		if (self.lost == True):
+			return 3
+			self.lost = False
+			# Need to reset everything here
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return 1
