@@ -79,13 +79,13 @@ class Display():
 		self.road_sign_event = pygame.USEREVENT + 4
 		self.start_game = pygame.USEREVENT + 5
 
-		pygame.display.set_caption('Display')
+		pygame.display.set_caption('Gesture Drive')
 		clock = pygame.time.Clock()
 		self.screen.fill([255, 255, 255])
 
 		# Load in assets
 		player_ss = spritesheet.spritesheet('assets/redcar.png')
-		self.player_images = player_ss.images_at(((0, 0, 100, 70), (100, 0, 100, 70), (200, 0, 95, 70)), colorkey=(186, 254, 180))
+		self.player_images = player_ss.images_at(((4, 0, 100, 70), (100, 0, 100, 70), (200, 0, 95, 70)), colorkey=(186, 254, 180))
 		self.player = self.player_images[0] # initialize to default straight car
 		self.tree_ss = spritesheet.spritesheet('assets/tree.png')
 		self.tree = self.tree_ss.image_at((0, 0, 1814, 2400), colorkey=(0, 0, 0))
@@ -299,8 +299,10 @@ class Display():
 		self.draw_word(score, self.width - 100, TEXT_HEIGHT, (YELLOW, BLACK))
 		highscore = 'HIGHSCORE:%d'% self.highscore
 		self.draw_word(highscore, 120, TEXT_HEIGHT, (YELLOW, RED))
-
-		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
+		
+		self.player_rect = pygame.Rect((self.pos[0] - 23)*2, self.player_height, 96, 70)
+		# Player hitbox: 
+		#pygame.draw.rect(self.screen, RED, self.player_rect)
 		self.screen.blit(self.player, self.player_rect)
 		self.player = self.player_images[0] # reset car to straight position
 		pygame.display.flip()
@@ -352,6 +354,7 @@ class Display():
 			if (self.score > self.highscore):
 				self.highscore = self.score
 			self.score = 0
+			self.radius = 0
 			self.obstacles.clear()
 			self.props.clear()
 			self.textures.clear()
