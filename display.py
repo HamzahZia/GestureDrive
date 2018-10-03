@@ -6,6 +6,8 @@ import random
 
 RED = (255,0,0)
 GREEN = (0, 200, 0)
+YELLOW = (255, 255, 0)
+BLACK = (0, 0, 0)
 DARK_GREEN = (0, 175, 0)
 WHITE = (255, 255, 255)
 GRAY = (150, 150, 150)
@@ -36,7 +38,8 @@ class Display():
 		self.player_height = 315
 		self.LEFT_BOUND_LIMIT = 75
 		self.RIGHT_BOUND_LIMIT = 225
-		self.score = 0		
+		self.score = 0	
+		self.highscore = 0	
 		# Variables for dealing with changing textures
 		self.textures = []
 		self.texture_count = 0 # count frames to update releasing another texture
@@ -290,29 +293,9 @@ class Display():
 		self.update_obstacles()
 
 		score = 'SCORE:%d'% self.score
-		score_surface = self.fontObj.render(score, True, (255, 255, 0))
-		score_rect = score_surface.get_rect()
-		score_rect.center  = (self.width/2, TEXT_HEIGHT)
-		score_outline = self.fontObj.render(score, True, (0, 0, 0))
-		outline_rect = score_outline.get_rect()
-		outline_rect.center = (self.width/2 - 1, TEXT_HEIGHT)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (self.width/2 + 1, TEXT_HEIGHT)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (self.width/2 - 1, TEXT_HEIGHT - 1)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (self.width/2 - 1, TEXT_HEIGHT + 1)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (self.width/2 + 1, TEXT_HEIGHT - 1)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (self.width/2 + 1, TEXT_HEIGHT + 1)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (self.width/2, TEXT_HEIGHT - 1)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (self.width/2, TEXT_HEIGHT + 2)
-		self.screen.blit(score_outline, outline_rect)
-		
-		self.screen.blit(score_surface, score_rect)
+		self.draw_word(score, self.width - 100, TEXT_HEIGHT, (YELLOW, BLACK))
+		highscore = 'HIGHSCORE:%d'% self.highscore
+		self.draw_word(highscore, 120, TEXT_HEIGHT, (YELLOW, RED))
 
 		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
 		self.screen.blit(self.player, self.player_rect)
@@ -322,10 +305,38 @@ class Display():
 	def draw_menu(self):
 		self.screen.blit(self.background, self.rect)
 		self.draw_road((self.road_height), self.road_pos, (GREEN, RED, GRAY, WHITE))
+		pygame.draw.circle(self.screen, RED, (self.pos[0]*2, self.pos[1]*2), 10)
 		pygame.display.flip()
+
+	def draw_word(self, text, x, y, colours):
+		score_surface = self.fontObj.render(text, True, colours[0])
+		score_rect = score_surface.get_rect()
+		score_rect.center  = (x, y)
+		score_outline = self.fontObj.render(text, True, colours[1])
+		outline_rect = score_outline.get_rect()
+		outline_rect.center = (x - 1, y)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (x + 1, y)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (x - 1, y - 1)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (x - 1, y + 1)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (x + 1, y - 1)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (x + 1, y + 1)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (x, y - 1)
+		self.screen.blit(score_outline, outline_rect)
+		outline_rect.center = (x, y + 2)
+		self.screen.blit(score_outline, outline_rect)
+		
+		self.screen.blit(score_surface, score_rect)
 
 	def is_done(self):
 		if (self.lost == True):
+			if (self.score > self.highscore):
+				self.highscore = self.score
 			self.score = 0
 			self.obstacles.clear()
 			self.props.clear()
