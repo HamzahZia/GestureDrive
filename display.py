@@ -326,9 +326,24 @@ class Display():
 
 	def is_done(self):
 		if (self.lost == True):
-			return 3
+			self.score = 0
+			self.obstacles.clear()
+			self.props.clear()
+			self.textures.clear()
+			self.center_line = [0] * (self.road_height)
+			self.offset = 0
+			self.dxoffset = 0
+			self.dxxoffset = 0
+			self.straighten = 0 # Equals 1 when road curve is straightening out again
+			self.curve_switch = 1 # Every n seconds alternate between emitting a left curve and right 
+			self.straight_count = 0 # Variable to hold curve state before straightening out
+			self.pos = (150, self.player_height)
+			pygame.time.set_timer(self.road_prop_event, 0)
+			pygame.time.set_timer(self.road_curve_event, 0)
+			pygame.time.set_timer(self.road_obstacle_event, 0)
+			pygame.time.set_timer(self.road_sign_event, 0)
 			self.lost = False
-			# Need to reset everything here
+			return 3
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return 1
