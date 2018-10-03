@@ -6,6 +6,7 @@ import random
 
 RED = (255,0,0)
 GREEN = (0, 200, 0)
+BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 BLACK = (0, 0, 0)
 DARK_GREEN = (0, 175, 0)
@@ -34,6 +35,7 @@ class Display():
 		self.width = 600
 		self.height = 400
 		self.lost = False
+		self.radius = 0
 
 		self.player_height = 315
 		self.LEFT_BOUND_LIMIT = 75
@@ -75,6 +77,7 @@ class Display():
 		self.road_curve_event = pygame.USEREVENT + 2
 		self.road_obstacle_event = pygame.USEREVENT + 3
 		self.road_sign_event = pygame.USEREVENT + 4
+		self.start_game = pygame.USEREVENT + 5
 
 		pygame.display.set_caption('Display')
 		clock = pygame.time.Clock()
@@ -305,7 +308,17 @@ class Display():
 	def draw_menu(self):
 		self.screen.blit(self.background, self.rect)
 		self.draw_road((self.road_height), self.road_pos, (GREEN, RED, GRAY, WHITE))
-		pygame.draw.circle(self.screen, RED, (self.pos[0]*2, self.pos[1]*2), 10)
+		play_rect = self.draw_word('Play', self.width/2, self.height/2, (YELLOW, BLUE))
+		x = self.pos[0]*2
+		y = self.pos[1]*2
+		rect = pygame.draw.circle(self.screen, RED, (x, y), 15)
+		pygame.draw.circle(self.screen, YELLOW, (x, y), self.radius)
+		if (rect.colliderect(play_rect) and self.radius < 15):
+			self.radius += 1
+		elif (self.radius > 0):
+			self.radius -= 1
+		if (self.radius == 15):
+			pygame.time.set_timer(self.start_game, 1)
 		pygame.display.flip()
 
 	def draw_word(self, text, x, y, colours):
@@ -332,6 +345,7 @@ class Display():
 		self.screen.blit(score_outline, outline_rect)
 		
 		self.screen.blit(score_surface, score_rect)
+		return score_rect
 
 	def is_done(self):
 		if (self.lost == True):
@@ -358,13 +372,13 @@ class Display():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return 1
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_LEFT:
-					pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
-					pygame.time.set_timer(self.road_curve_event, ROAD_CURVE_DELAY)
-					pygame.time.set_timer(self.road_obstacle_event, ROAD_OBSTACLE_DELAY)
-					pygame.time.set_timer(self.road_sign_event, ROAD_SIGN_DELAY)
-					return 2
+			if event.type == self.start_game:
+				pygame.time.set_timer(self.start_game, 0)				
+				pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
+				pygame.time.set_timer(self.road_curve_event, ROAD_CURVE_DELAY)
+				pygame.time.set_timer(self.road_obstacle_event, ROAD_OBSTACLE_DELAY)
+				pygame.time.set_timer(self.road_sign_event, ROAD_SIGN_DELAY)
+				return 2
 			if event.type == self.road_prop_event:
 				choice = random.randint(1,5)
 				if choice < 4:
