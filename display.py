@@ -91,20 +91,20 @@ class Display():
 		player_ss = spritesheet.spritesheet('assets/redcar.png')
 		self.player_images = player_ss.images_at(((4, 0, 100, 70), (100, 0, 100, 70), (200, 0, 95, 70)), colorkey=(186, 254, 180))
 		self.player = self.player_images[0] # initialize to default straight car
-		self.tree_ss = spritesheet.spritesheet('assets/tree.png')
-		self.tree = self.tree_ss.image_at((0, 0, 1814, 2400), colorkey=(0, 0, 0))
-		self.rock_ss = spritesheet.spritesheet('assets/rock.png')
-		self.rock = self.rock_ss.image_at((0, 0, 720, 500), colorkey=(0, 0, 0))
-		self.speedsign_ss = spritesheet.spritesheet('assets/speedsign.png')
-		self.speedsign = self.speedsign_ss.image_at((0, 0, 141, 200), colorkey=(255, 255, 255))
-		self.bluecar_ss = spritesheet.spritesheet('assets/bluecar.png')
-		self.bluecar = self.bluecar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
-		self.graycar_ss = spritesheet.spritesheet('assets/graycar.png')
-		self.graycar = self.graycar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
-		self.purplecar_ss = spritesheet.spritesheet('assets/purplecar.png')
-		self.purplecar = self.purplecar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
-		self.greencar_ss = spritesheet.spritesheet('assets/greencar.png')
-		self.greencar = self.greencar_ss.image_at((0, 0, 100, 67), colorkey=(186, 254, 180))
+		tree_ss = spritesheet.spritesheet('assets/tree.png')
+		self.tree = tree_ss.image_at((0, 0, 1814, 2400), colorkey=(0, 0, 0))
+		rock_ss = spritesheet.spritesheet('assets/rock.png')
+		self.rock = rock_ss.image_at((0, 0, 720, 500), colorkey=(0, 0, 0))
+		speedsign_ss = spritesheet.spritesheet('assets/speedsign.png')
+		self.speedsign = speedsign_ss.image_at((0, 0, 141, 200), colorkey=(255, 255, 255))
+		bluecar_ss = spritesheet.spritesheet('assets/bluecar.png')
+		self.bluecar = bluecar_ss.image_at((3, 0, 97, 67), colorkey=(186, 254, 180))
+		graycar_ss = spritesheet.spritesheet('assets/graycar.png')
+		self.graycar = graycar_ss.image_at((3, 0, 97, 67), colorkey=(186, 254, 180))
+		purplecar_ss = spritesheet.spritesheet('assets/purplecar.png')
+		self.purplecar = purplecar_ss.image_at((3, 0, 97, 67), colorkey=(186, 254, 180))
+		greencar_ss = spritesheet.spritesheet('assets/greencar.png')
+		self.greencar = greencar_ss.image_at((3, 0, 97, 67), colorkey=(186, 254, 180))
 		self.cars = (self.bluecar, self.graycar, self.purplecar, self.greencar)
 
 	def update_pos(self, pos):
@@ -184,7 +184,7 @@ class Display():
 				obst_rect = pygame.Rect((o_x, o_y, o_width, o_height))
 				pygame.draw.rect(self.screen, RED, obst_rect)
 				self.screen.blit(car, obst_rect)
-				if (o_y >= self.player_height):
+				if (o_y >= self.player_height - 10):
 					if(self.player_rect.colliderect(obst_rect)):
 						self.lost = True
 				if (o.update_texture(self.height)):
@@ -303,6 +303,13 @@ class Display():
 
 		self.update_textures()
 		self.update_props()
+
+		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 96, 70)
+		# Player hitbox: 
+		pygame.draw.rect(self.screen, RED, self.player_rect)
+		self.screen.blit(self.player, self.player_rect)
+		self.player = self.player_images[0] # reset car to straight position
+
 		self.update_obstacles()
 
 		score = 'SCORE:%d'% self.score
@@ -310,11 +317,6 @@ class Display():
 		highscore = 'HIGHSCORE:%d'% self.highscore
 		self.draw_word(highscore, 120, TEXT_HEIGHT, (YELLOW, RED), True)
 		
-		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 96, 70)
-		# Player hitbox: 
-		pygame.draw.rect(self.screen, RED, self.player_rect)
-		self.screen.blit(self.player, self.player_rect)
-		self.player = self.player_images[0] # reset car to straight position
 		pygame.display.flip()
 
 	def draw_menu(self):
