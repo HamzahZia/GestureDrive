@@ -181,8 +181,9 @@ class Display():
 				o_x = ib_1 + offset
 				o_y = self.road_pos + o.position - o_height
 				car = pygame.transform.scale(self.cars[o.type], (o_width, o_height))
+				# Obstacle hitbox
 				obst_rect = pygame.Rect((o_x, o_y, o_width, o_height))
-				pygame.draw.rect(self.screen, RED, obst_rect)
+				#pygame.draw.rect(self.screen, RED, obst_rect)
 				self.screen.blit(car, obst_rect)
 				if (o_y >= self.player_height - 10):
 					if(self.player_rect.colliderect(obst_rect)):
@@ -306,7 +307,7 @@ class Display():
 
 		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 96, 70)
 		# Player hitbox: 
-		pygame.draw.rect(self.screen, RED, self.player_rect)
+		#pygame.draw.rect(self.screen, RED, self.player_rect)
 		self.screen.blit(self.player, self.player_rect)
 		self.player = self.player_images[0] # reset car to straight position
 
