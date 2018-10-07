@@ -184,7 +184,7 @@ class Display():
 				obst_rect = pygame.Rect((o_x, o_y, o_width, o_height))
 				pygame.draw.rect(self.screen, RED, obst_rect)
 				self.screen.blit(car, obst_rect)
-				if (o_y >= self.player_height - 15):
+				if (o_y >= self.player_height):
 					if(self.player_rect.colliderect(obst_rect)):
 						self.lost = True
 				if (o.update_texture(self.height)):
@@ -312,7 +312,7 @@ class Display():
 		
 		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 96, 70)
 		# Player hitbox: 
-		#pygame.draw.rect(self.screen, RED, self.player_rect)
+		pygame.draw.rect(self.screen, RED, self.player_rect)
 		self.screen.blit(self.player, self.player_rect)
 		self.player = self.player_images[0] # reset car to straight position
 		pygame.display.flip()
