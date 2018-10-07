@@ -122,15 +122,15 @@ class Display():
 		elif (x > self.pos[0] + 3):
 			self.player = self.player_images[1]
 
-		if (x < self.pos[0] - 15):
-			x = self.pos[0] - 15
-		elif (x > self.pos[0] + 15):
-			x = self.pos[0] + 10
+		if (x < self.pos[0] - 20):
+			x = self.pos[0] - 20
+		elif (x > self.pos[0] + 20):
+			x = self.pos[0] + 20
 
-		if (y < self.pos[1] - 15):
-			y = self.pos[1] - 15
-		elif (y > self.pos[1] + 15):
-			y = self.pos[1] + 15
+		if (y < self.pos[1] - 20):
+			y = self.pos[1] - 20
+		elif (y > self.pos[1] + 20):
+			y = self.pos[1] + 20
 		
 		self.pos = (x, y)
 
