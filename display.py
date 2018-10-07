@@ -36,6 +36,8 @@ class Display():
 		self.height = 400
 		self.lost = False
 		self.radius = 0
+		self.play_count = 0
+		self.start_text = 'Play'
 
 		self.player_height = 315
 		self.LEFT_BOUND_LIMIT = 75
@@ -84,6 +86,8 @@ class Display():
 		self.screen.fill([255, 255, 255])
 
 		# Load in assets
+		self.title_ss = spritesheet.spritesheet('assets/Title.png')
+		self.title = self.title_ss.image_at((0, 0, 416, 32), colorkey=(0, 0, 0))
 		player_ss = spritesheet.spritesheet('assets/redcar.png')
 		self.player_images = player_ss.images_at(((4, 0, 100, 70), (100, 0, 100, 70), (200, 0, 95, 70)), colorkey=(186, 254, 180))
 		self.player = self.player_images[0] # initialize to default straight car
@@ -119,11 +123,16 @@ class Display():
 			self.player = self.player_images[1]
 
 		if (x < self.pos[0] - 10):
-			self.pos = (self.pos[0] - 10, y)
+			x = self.pos[0] - 10
 		elif (x > self.pos[0] + 6):
-			self.pos = (self.pos[0] + 10, y)
-		else: 
-			self.pos = (x, y)
+			x = self.pos[0] + 10
+
+		if (y < self.pos[1] - 10):
+			y = self.pos[1] - 10
+		elif (y > self.pos[1] + 10):
+			y = self.pos[1] + 10
+		
+		self.pos = (x, y)
 
 	def update_textures(self):
 		# Draw and update all textures i.e dark green lines that simulate 3D
@@ -173,6 +182,7 @@ class Display():
 				o_y = self.road_pos + o.position - o_height
 				car = pygame.transform.scale(self.cars[o.type], (o_width, o_height))
 				obst_rect = pygame.Rect((o_x, o_y, o_width, o_height))
+				pygame.draw.rect(self.screen, RED, obst_rect)
 				self.screen.blit(car, obst_rect)
 				if (o_y >= self.player_height - 15):
 					if(self.player_rect.colliderect(obst_rect)):
@@ -296,11 +306,11 @@ class Display():
 		self.update_obstacles()
 
 		score = 'SCORE:%d'% self.score
-		self.draw_word(score, self.width - 100, TEXT_HEIGHT, (YELLOW, BLACK))
+		self.draw_word(score, self.width - 100, TEXT_HEIGHT, (YELLOW, BLACK), True)
 		highscore = 'HIGHSCORE:%d'% self.highscore
-		self.draw_word(highscore, 120, TEXT_HEIGHT, (YELLOW, RED))
+		self.draw_word(highscore, 120, TEXT_HEIGHT, (YELLOW, RED), True)
 		
-		self.player_rect = pygame.Rect((self.pos[0] - 23)*2, self.player_height, 96, 70)
+		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 96, 70)
 		# Player hitbox: 
 		#pygame.draw.rect(self.screen, RED, self.player_rect)
 		self.screen.blit(self.player, self.player_rect)
@@ -310,7 +320,17 @@ class Display():
 	def draw_menu(self):
 		self.screen.blit(self.background, self.rect)
 		self.draw_road((self.road_height), self.road_pos, (GREEN, RED, GRAY, WHITE))
-		play_rect = self.draw_word('Play', self.width/2, self.height/2, (YELLOW, BLUE))
+		title_rect = pygame.Rect(0, 0, 416, 32)
+		title_rect.center = (self.width/2, self.height/2 - 20)
+		self.screen.blit(self.title, title_rect)
+		self.play_count += 1
+		if (self.play_count > 5):
+			play_rect = self.draw_word(self.start_text, self.width/2, self.height/2 + 20, (YELLOW, BLUE), False)
+		else:
+			play_rect = self.draw_word(self.start_text, self.width/2, self.height/2 + 20, (YELLOW, BLUE), True)
+		if (self.play_count >= 10):
+			self.play_count = 0
+
 		x = self.pos[0]*2
 		y = self.pos[1]*2
 		rect = pygame.draw.circle(self.screen, RED, (x, y), 15)
@@ -323,36 +343,38 @@ class Display():
 			pygame.time.set_timer(self.start_game, 1)
 		pygame.display.flip()
 
-	def draw_word(self, text, x, y, colours):
-		score_surface = self.fontObj.render(text, True, colours[0])
-		score_rect = score_surface.get_rect()
-		score_rect.center  = (x, y)
-		score_outline = self.fontObj.render(text, True, colours[1])
-		outline_rect = score_outline.get_rect()
-		outline_rect.center = (x - 1, y)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (x + 1, y)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (x - 1, y - 1)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (x - 1, y + 1)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (x + 1, y - 1)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (x + 1, y + 1)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (x, y - 1)
-		self.screen.blit(score_outline, outline_rect)
-		outline_rect.center = (x, y + 2)
-		self.screen.blit(score_outline, outline_rect)
-		
-		self.screen.blit(score_surface, score_rect)
-		return score_rect
+	def draw_word(self, text, x, y, colours, print):
+		word_surface = self.fontObj.render(text, True, colours[0])
+		word_rect = word_surface.get_rect()
+		word_rect.center  = (x, y)
+		if (print):
+			word_outline = self.fontObj.render(text, True, colours[1])
+			outline_rect = word_outline.get_rect()
+			outline_rect.center = (x - 1, y)
+			self.screen.blit(word_outline, outline_rect)
+			outline_rect.center = (x + 1, y)
+			self.screen.blit(word_outline, outline_rect)
+			outline_rect.center = (x - 1, y - 1)
+			self.screen.blit(word_outline, outline_rect)
+			outline_rect.center = (x - 1, y + 1)
+			self.screen.blit(word_outline, outline_rect)
+			outline_rect.center = (x + 1, y - 1)
+			self.screen.blit(word_outline, outline_rect)
+			outline_rect.center = (x + 1, y + 1)
+			self.screen.blit(word_outline, outline_rect)
+			outline_rect.center = (x, y - 1)
+			self.screen.blit(word_outline, outline_rect)
+			outline_rect.center = (x, y + 2)
+			self.screen.blit(word_outline, outline_rect)
+			
+			self.screen.blit(word_surface, word_rect)
+		return word_rect
 
 	def is_done(self):
 		if (self.lost == True):
 			if (self.score > self.highscore):
 				self.highscore = self.score
+			self.start_text = 'Play Again'
 			self.score = 0
 			self.radius = 0
 			self.obstacles.clear()
