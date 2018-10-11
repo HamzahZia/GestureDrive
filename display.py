@@ -22,9 +22,9 @@ CAR_MULTIPLIER = 4
 SPEEDSIGN_MULTIPLIER = 10
 
 ROAD_PROP_DELAY = 2000
-ROAD_OBSTACLE_DELAY = 3000
 ROAD_CURVE_DELAY = 18000
 ROAD_SIGN_DELAY = 23000
+SPEED_UP_DELAY = 25000
 
 random.seed()
 
@@ -74,12 +74,14 @@ class Display():
 		self.pos = (150, self.player_height) # initial position of player
 		self.player_rect = pygame.Rect((self.pos[0] - 25)*2, self.player_height, 100, 70)
 		self.screen=pygame.display.set_mode((self.width, self.height))
-
+		
+		self.ROAD_OBSTACLE_DELAY = 3000
 		self.road_prop_event = pygame.USEREVENT + 1
 		self.road_curve_event = pygame.USEREVENT + 2
 		self.road_obstacle_event = pygame.USEREVENT + 3
 		self.road_sign_event = pygame.USEREVENT + 4
-		self.start_game = pygame.USEREVENT + 5
+		self.start_game_event = pygame.USEREVENT + 5
+		self.speedup_event = pygame.USEREVENT + 6
 
 		pygame.display.set_caption('Gesture Drive')
 		clock = pygame.time.Clock()
@@ -343,7 +345,7 @@ class Display():
 		elif (self.radius > 0):
 			self.radius -= 1
 		if (self.radius == 15):
-			pygame.time.set_timer(self.start_game, 1)
+			pygame.time.set_timer(self.start_game_event, 1)
 		pygame.display.flip()
 
 	def draw_word(self, text, x, y, colours, print):
@@ -395,17 +397,20 @@ class Display():
 			pygame.time.set_timer(self.road_curve_event, 0)
 			pygame.time.set_timer(self.road_obstacle_event, 0)
 			pygame.time.set_timer(self.road_sign_event, 0)
+			pygame.time.set_timer(self.speedup_event, 0)
 			self.lost = False
 			return 3
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return 1
-			if event.type == self.start_game:
-				pygame.time.set_timer(self.start_game, 0)				
+			if event.type == self.start_game_event:
+				self.ROAD_OBSTACLE_DELAY = 2000
+				pygame.time.set_timer(self.start_game_event, 0)				
 				pygame.time.set_timer(self.road_prop_event, ROAD_PROP_DELAY)
 				pygame.time.set_timer(self.road_curve_event, ROAD_CURVE_DELAY)
-				pygame.time.set_timer(self.road_obstacle_event, ROAD_OBSTACLE_DELAY)
+				pygame.time.set_timer(self.road_obstacle_event, self.ROAD_OBSTACLE_DELAY)
 				pygame.time.set_timer(self.road_sign_event, ROAD_SIGN_DELAY)
+				pygame.time.set_timer(self.speedup_event, SPEED_UP_DELAY)
 				return 2
 			if event.type == self.road_prop_event:
 				choice = random.randint(1,5)
@@ -451,6 +456,9 @@ class Display():
 					type = random.choice(range(len(self.cars)))
 					obstacle.set_type(type)
 					self.obstacles.insert(0, obstacle)
+			if event.type == self.speedup_event:
+				if self.ROAD_OBSTACLE_DELAY > 1200:
+					self.ROAD_OBSTACLE_DELAY -= 200
 
 		return 0
 
