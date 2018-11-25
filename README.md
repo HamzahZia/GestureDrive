@@ -9,5 +9,10 @@ overtime vehicle speed increases and it becomes more difficult to avoid other ve
 
 **Disclaimer:** Assets used in game are not my own, and Victor Dibia's hand-tracking tutorial was used and incredibly helpful in making this game.
 
+## Installation
+To run game locally, must first follow [tensorflow's installation](https://www.tensorflow.org/install/pip). Then
+`pip install opencv` and
+`pip install pygame`
+
 ### References
 Victor Dibia, Real-time Hand-Detection using Neural Networks (SSD) on Tensorflow, (2017), GitHub repository, https://github.com/victordibia/handtracking
